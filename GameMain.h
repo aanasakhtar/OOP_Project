@@ -5,7 +5,7 @@ using namespace std;
 class Player{
     private:
         int health_status;
-        int fireball_count;
+        int bullet_count;
         int healingpotion_count;
         double velocity;
         bool shield_status;
@@ -21,8 +21,13 @@ class Player{
         void deactivate_shield();  
         void deactivate_shield();  
         bool is_shield_active() const;
-        void collect_item(CollectableItems item);
-        void throw_fireball();
+        void collect_item(HealingPotion& potion);
+        void collect_item(Bullets& bullet);
+        void collect_item(Health& health);
+        Bullets throw_bullet(int x,int y);
+        void hit(Spikes& spike);
+
+        
 
 
 
@@ -108,13 +113,30 @@ public:
 
 class Bullets : public CollectableItems {
 private:
-    int fireball_count;
+    int bullet_count;
 
 public:
     Bullets();
-    Bullets(int x, int y, int count);            // Constructor to initialize position and fireball count
-    void collect_fireballs();                      // Adds fireballs to player’s inventory
-    int get_fireball_count() const;                // Returns the fireball count
+    Bullets(int x, int y, int count, int bullet);            // Constructor to initialize position and fireball count
+    
+    int get_bullet_count() const;                // Returns the fireball count
+};
+
+class Health: public CollectableItems{
+    private:
+        int health_amount;
+    public:
+        Health();
+        Health(int amount);
+        int get_amount();
+};
+
+class Shield:public CollectableItems{
+    private:
+    public:
+
+        
+
 };
 
 
@@ -127,18 +149,21 @@ public:
     Obstacle(int x, int y);
     virtual void move_left();                 // Moves obstacle leftward
     virtual void inflict_damage(Player& player); // Inflicts damage on collision
+    virtual int get_damage()=0;
 };
 
 class Spikes : public Obstacle {
 public:
     Spikes(int x, int y);
     void inflict_damage(Player& player) override; // Damages player on contact
+    int get_damage();
 };
 
 class AcidBath : public Obstacle {
 public:
     AcidBath(int x, int y);
     void inflict_damage(Player& player) override; // Poisons player on contact
+    int get_damage();
 };
 
 
