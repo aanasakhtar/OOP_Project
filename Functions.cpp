@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include "GameMain.h"
 
 
@@ -20,7 +19,14 @@ Spider::Spider(int damage,int acid_balls):Enemy(damage),acid_balls(acid_balls){}
 Bats::Bats():Enemy(){}
 Bats::Bats(int damage):Enemy(damage){}
 
-//
-=======
+//CollectableItem
+CollectableItems::CollectableItems(){}
+CollectableItems::CollectableItems(int x, int y) : xpos(x), ypos(y), collected(false) {}
 
->>>>>>> 732742752779fd2f514c8534ce7ab834f403e90b
+// HealingPotion 
+HealingPotion::HealingPotion(){}
+HealingPotion::HealingPotion(int x, int y, int heal_amount) : CollectableItems(x, y), healing_amount(heal_amount) {}
+
+//FireBalls
+Fireballs::Fireballs(){}
+Fireballs::Fireballs(int x, int y, int count) : CollectableItems(x, y), fireball_count(count) {}
