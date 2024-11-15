@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include "GameMain.h"
 
 
@@ -20,3 +21,6 @@ Bats::Bats():Enemy(){}
 Bats::Bats(int damage):Enemy(damage){}
 
 //
+=======
+
+>>>>>>> 732742752779fd2f514c8534ce7ab834f403e90b
