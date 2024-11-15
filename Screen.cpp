@@ -34,6 +34,22 @@ int main()
     float IntroTextY = (windowSize.y - textBounds.height) / 2;
 
     IntroText.setPosition(IntroTextX, IntroTextY);
+    sf::Texture platformTexture1, platformTexture2, platformTexture3;
+    if (!platformTexture1.loadFromFile("Tiles_rock\\tile1.png") ||
+        !platformTexture2.loadFromFile("Tiles_rock\\tile2.png") ||
+        !platformTexture3.loadFromFile("Tiles_rock\\tile3.png"))
+    {
+        std::cout << "could not load the tile" << std::endl;
+    }
+    std::vector<sf::Sprite> platform;
+    platform.push_back(sf::Sprite(platformTexture1));
+    platform.push_back(sf::Sprite(platformTexture2));
+    platform.push_back(sf::Sprite(platformTexture3));
+
+    int platformTileWidth = platformTexture1.getSize().x;
+    int platformTileHeight = platformTexture1.getSize().y;
+
+    int numTiles = windowSize.x / platformTileWidth;
 
     while (window.isOpen())
     {
@@ -52,6 +68,15 @@ int main()
         window.clear();
         // Drawing the background
         window.draw(bgSprite);
+        // Drawing Platform
+        for (int i = 0; i < numTiles; ++i)
+        {
+            sf::Sprite &platformSprite = platform[i % 3]; // i % 3 will cycle through 0, 1, 2
+
+            platformSprite.setPosition(i * platformTileWidth, windowSize.y - platformTileHeight);
+
+            window.draw(platformSprite);
+        }
         // Drawing IntroText
         window.draw(IntroText);
         // Display what has been drawn so far
