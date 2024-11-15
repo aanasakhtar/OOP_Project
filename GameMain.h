@@ -8,11 +8,23 @@ class Player{
         int fireball_count;
         int healingpotion_count;
         double velocity;
+        bool shield_status;
         //will also have sprite visuals here
 
     public:
+        Player();
         void move(int x,int y);
-        void reduce_health(int damage)
+        void reduce_health(int damage);
+        void duck(); 
+        void jump(); 
+        void activate_shield();  
+        void deactivate_shield();  
+        void deactivate_shield();  
+        bool is_shield_active() const;
+        void collect_item(CollectableItems item);
+        void throw_fireball();
+
+
 
 
 };
@@ -43,15 +55,20 @@ class AcidBall{
     private:
         int damage;
     public:
-        void damage_player();
-
+        AcidBall(int dmg);
+        void move_left();                         // Moves acid ball leftward
+        void damage_player(Player& player);       // Inflicts damage if it hits player
+        bool is_hit(const Player& player);        // Checks collision with player
+        void deactivate();                        // Deactivates after impact
 };
+
+
 class Spider: public Enemy{
     private:
-        Acidball acidballs;
+        int health;
     public:
         Spider();
-        Spider(int damage,int balls);
+        Spider(int damage);
         AcidBall throw_Acidball();
 
 };
@@ -89,13 +106,40 @@ public:
     int get_healing_amount() const;                // Returns the healing amount
 };
 
-class Fireballs : public CollectableItems {
+class Bullets : public CollectableItems {
 private:
     int fireball_count;
 
 public:
-    Fireballs();
-    Fireballs(int x, int y, int count);            // Constructor to initialize position and fireball count
+    Bullets();
+    Bullets(int x, int y, int count);            // Constructor to initialize position and fireball count
     void collect_fireballs();                      // Adds fireballs to player’s inventory
     int get_fireball_count() const;                // Returns the fireball count
 };
+
+
+class Obstacle {
+private:
+    int xpos;
+    int ypos;
+
+public:
+    Obstacle(int x, int y);
+    virtual void move_left();                 // Moves obstacle leftward
+    virtual void inflict_damage(Player& player); // Inflicts damage on collision
+};
+
+class Spikes : public Obstacle {
+public:
+    Spikes(int x, int y);
+    void inflict_damage(Player& player) override; // Damages player on contact
+};
+
+class AcidBath : public Obstacle {
+public:
+    AcidBath(int x, int y);
+    void inflict_damage(Player& player) override; // Poisons player on contact
+};
+
+
+

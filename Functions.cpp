@@ -1,5 +1,7 @@
 #include "GameMain.h"
 
+//player
+Player::Player():health_status(100),fireball_count(0),healingpotion_count(0),shield_status(false){}
 
 //enemy class function
 Enemy::Enemy():damage_amount(0){}
@@ -13,7 +15,7 @@ void Enemy::set_damage(int d){
 
 //spider
 Spider::Spider():Enemy(){}
-Spider::Spider(int damage,int acid_balls):Enemy(damage),acid_balls(acid_balls){}
+Spider::Spider(int damage):Enemy(damage){}
 
 //bats
 Bats::Bats():Enemy(){}
@@ -27,6 +29,8 @@ CollectableItems::CollectableItems(int x, int y) : xpos(x), ypos(y), collected(f
 HealingPotion::HealingPotion(){}
 HealingPotion::HealingPotion(int x, int y, int heal_amount) : CollectableItems(x, y), healing_amount(heal_amount) {}
 
-//FireBalls
-Fireballs::Fireballs(){}
-Fireballs::Fireballs(int x, int y, int count) : CollectableItems(x, y), fireball_count(count) {}
+//Bullets
+Bullets::Bullets(){}
+Bullets::Bullets(int x, int y, int count) : CollectableItems(x, y), fireball_count(count) {}
+
+//
