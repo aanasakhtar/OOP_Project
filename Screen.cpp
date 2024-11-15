@@ -4,6 +4,9 @@
 
 int main()
 {
+    bool gameStart = false;
+    float platformVelocity = 5.0f;
+    float platformOffset = 0.0f;
     sf::RenderWindow window(sf::VideoMode(1800, 960), "Basic SFML Window");
 
     sf::Texture bgTexture;
@@ -25,6 +28,7 @@ int main()
     sf::Font font;
     if (!font.loadFromFile("SFML-Progs\\fonts\\arial.ttf"))
         std::cout << "Couldn't load the font" << std::endl;
+
     sf::Text IntroText("Press Space to begin", font, 50);
     IntroText.setFillColor(sf::Color(255, 255, 255, 100));
 
@@ -34,22 +38,36 @@ int main()
     float IntroTextY = (windowSize.y - textBounds.height) / 2;
 
     IntroText.setPosition(IntroTextX, IntroTextY);
-    sf::Texture platformTexture1, platformTexture2, platformTexture3;
-    if (!platformTexture1.loadFromFile("Tiles_rock\\tile1.png") ||
-        !platformTexture2.loadFromFile("Tiles_rock\\tile2.png") ||
-        !platformTexture3.loadFromFile("Tiles_rock\\tile3.png"))
+
+    sf::Text Score("Score: ", font, 40);
+    Score.setFillColor(sf::Color(119, 105, 78));
+
+    Score.setPosition(100, 100);
+
+    sf::Texture platformTexture;
+    if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
     {
         std::cout << "could not load the tile" << std::endl;
     }
-    std::vector<sf::Sprite> platform;
-    platform.push_back(sf::Sprite(platformTexture1));
-    platform.push_back(sf::Sprite(platformTexture2));
-    platform.push_back(sf::Sprite(platformTexture3));
+    sf::Sprite platformSprite;
+    platformSprite.setTexture(platformTexture);
 
-    int platformTileWidth = platformTexture1.getSize().x;
-    int platformTileHeight = platformTexture1.getSize().y;
+    platformSprite.setScale(2.0f, 2.0f);
 
-    int numTiles = windowSize.x / platformTileWidth;
+    int platformTileWidth = platformTexture.getSize().x;
+    int platformTileHeight = platformTexture.getSize().y;
+
+    int numTiles = windowSize.x / platformTileWidth + 1;
+
+    sf::Texture idlePlayerTexture;
+
+    if (!idlePlayerTexture.loadFromFile("Gangsters_1\\Idle.png"))
+        std::cout << "Could not load the player" << std::endl;
+
+    sf::Sprite idlePlayerSprite;
+    idlePlayerSprite.setTexture(idlePlayerTexture);
+
+    idlePlayerSprite.setPosition(50, platformSprite.getPosition().y + platformTexture.getSize().y);
 
     while (window.isOpen())
     {
@@ -63,22 +81,47 @@ int main()
                 std::cout << "Closed the window";
                 window.close();
             }
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+            {
+                gameStart = true;
+            }
         }
+        // Update platform position if game has started
+        if (gameStart)
+        {
+            platformOffset += platformVelocity; // Move the platform horizontally
+        }
+
         // Clear the window with a black color
         window.clear();
         // Drawing the background
         window.draw(bgSprite);
         // Drawing Platform
-        for (int i = 0; i < numTiles; ++i)
+        if (!gameStart)
         {
-            sf::Sprite &platformSprite = platform[i % 3]; // i % 3 will cycle through 0, 1, 2
+            // Drawing IntroText
+            window.draw(IntroText);
+            // Draw idleplayer
+            window.draw(idlePlayerSprite);
 
-            platformSprite.setPosition(i * platformTileWidth, windowSize.y - platformTileHeight);
+            for (int i = 0; i < numTiles; ++i)
+            {
+                platformSprite.setPosition(i * platformTileWidth, windowSize.y - platformTileHeight);
 
-            window.draw(platformSprite);
+                window.draw(platformSprite);
+            }
         }
-        // Drawing IntroText
-        window.draw(IntroText);
+        else
+        {
+            for (int i = 0; i < numTiles; ++i)
+            {
+                // Position each tile based on its index and the current offset
+                platformSprite.setPosition(i * platformTileWidth - platformOffset, windowSize.y - platformTileHeight);
+                window.draw(platformSprite);
+            }
+        }
+        // Drawing Score
+        window.draw(Score);
         // Display what has been drawn so far
         window.display();
     }
