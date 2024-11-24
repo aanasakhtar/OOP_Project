@@ -6,9 +6,11 @@ int main()
     bool gameStart = false;
     float platformVelocity = 1.5f;
     float platformOffset = 0.0f;
-    float backgroundVelocity = 0.5f; // Slower speed for the background
+    float backgroundVelocity = 0.5f;
     float backgroundOffset = 0.0f;
     int scoreCounter = 0;
+    sf::Clock scoreClock;
+    sf::Text Score;
 
     const float gravity = 0.2f;
     const float jumpStrength = -10.0f;
@@ -70,7 +72,7 @@ int main()
     float playerY = windowSize.y - platformTileHeight - (idlePlayerTexture.getSize().y);
     float playerX = 50.0f;
     idlePlayerSprite.setTexture(idlePlayerTexture);
-    idlePlayerSprite.setPosition(playerX, playerY); // Initial player position
+    idlePlayerSprite.setPosition(playerX, playerY);
 
     // Load Running Animation Frames
     std::vector<sf::Texture> runningTextures(4);
@@ -83,7 +85,7 @@ int main()
     runningPlayerSprite.setScale(1.25f, 1.25f);
     runningPlayerSprite.setPosition(playerX, playerY);
 
-    // Animation timing variables
+    // Animation variables
     sf::Clock animationClock;
     int runningFrame = 0;
     float frameDuration = 0.1f;
@@ -117,7 +119,13 @@ int main()
         // Update platform and background position if game has started
         if (gameStart)
         {
-            ++scoreCounter;
+            if (scoreClock.getElapsedTime().asSeconds() >= 1.0f)
+            {
+                scoreCounter += 1; // Increment the score
+                scoreClock.restart();
+            }
+
+            Score.setString("Score: " + std::to_string(scoreCounter));
 
             // Move background
             backgroundOffset += backgroundVelocity;
@@ -132,7 +140,7 @@ int main()
             platformOffset += platformVelocity;
             if (platformOffset >= platformTileWidth)
             {
-                platformOffset = 0.0f; // Reset the offset to loop platform
+                platformOffset = 0.0f; // Reset
             }
 
             // Handle jumping logic
@@ -183,8 +191,7 @@ int main()
         }
         else
         {
-            // Draw Player
-            window.draw(idlePlayerSprite);
+            window.draw(runningPlayerSprite);
         }
 
         // Draw healthbar
