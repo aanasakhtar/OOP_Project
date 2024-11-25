@@ -16,9 +16,14 @@ Game::Game()
 
 void Game::loadAssets()
 {
+    std::cout << "Loading assets..." << std::endl;
+
     // Load Background
     if (!bgTexture.loadFromFile("Background\\Bright\\Background.png"))
-        std::cout << "Could not load background" << std::endl;
+    {
+        std::cerr << "Error: Could not load Background.png" << std::endl;
+        exit(EXIT_FAILURE); // Exit the program if resource fails
+    }
 
     bgSprite1.setTexture(bgTexture);
     bgSprite2.setTexture(bgTexture);
@@ -35,7 +40,10 @@ void Game::loadAssets()
 
     // Load Font
     if (!font.loadFromFile("SFML-Progs\\fonts\\arial.ttf"))
-        std::cout << "Could not load font" << std::endl;
+    {
+        std::cerr << "Error: Could not load arial.ttf" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     scoreText.setFont(font);
     scoreText.setCharacterSize(40);
@@ -51,7 +59,10 @@ void Game::loadAssets()
 
     // Load Platform
     if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
-        std::cout << "Could not load platform" << std::endl;
+    {
+        std::cerr << "Error: Could not load tile2.png" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     platformSprite.setTexture(platformTexture);
     platformSprite.setScale(2.0f, 2.0f);
@@ -61,26 +72,33 @@ void Game::loadAssets()
     numTiles = window.getSize().x / platformTileWidth + 2;
 
     // Initialize Player
-    player.loadPlayerAssets();
-    player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height);
+    if (!player.loadPlayerAssets())
+    {
+        std::cerr << "Error: Could not load player assets" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f);
 }
 
 void Game::run()
 {
     while (window.isOpen())
     {
-        std::cout << "Handling events..." << std::endl;
+        std::cout << "Running game loop..." << std::endl;
+
         handleEvents();
 
         if (gameStart)
         {
-            std::cout << "Updating game..." << std::endl;
+            std::cout << "Game is running, updating game..." << std::endl;
             updateGame();
         }
 
         std::cout << "Rendering game..." << std::endl;
         renderGame();
     }
+
+    std::cout << "Window closed." << std::endl;
 }
 
 void Game::handleEvents()

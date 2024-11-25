@@ -1,9 +1,6 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-#include <SFML/Graphics.hpp>
-#include <iostream>
-
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(800, 600), "Minimal Example");

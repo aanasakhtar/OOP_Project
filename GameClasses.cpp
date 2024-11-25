@@ -10,21 +10,34 @@ Player::Player()
 
 bool Player::loadPlayerAssets()
 {
+    std::cout << "Loading player assets..." << std::endl;
+
     // Load idle texture
     if (!idleTexture.loadFromFile("Gangsters_1\\Idle.png"))
     {
-        std::cerr << "Could not load idle texture" << std::endl;
+        std::cerr << "Error: Could not load idle texture." << std::endl;
         return false;
     }
 
     // Load running textures
+
+    runningTextures.resize(4);
+
     for (int i = 0; i < 4; ++i)
     {
-        if (!runningTextures[i].loadFromFile("Gangsters_1\\Run" + std::to_string(i + 1) + ".png"))
-            std::cout << "Could not load running sprite " << i + 1 << std::endl;
+        std::string texturePath = "Gangsters_1\\Run" + std::to_string(i + 1) + ".png";
+        std::cout << "Loading: " << texturePath << std::endl;
+
+        if (!runningTextures[i].loadFromFile(texturePath))
+        {
+            std::cerr << "Error: Could not load " << texturePath << std::endl;
+            return false;
+        }
+
+        std::cout << "Successfully loaded: " << texturePath << std::endl;
     }
 
-    // Set idle texture initially
+    std::cout << "Player assets loaded successfully." << std::endl;
     playerSprite.setTexture(idleTexture);
     playerSprite.setScale(1.25f, 1.25f);
 
