@@ -7,10 +7,10 @@
 class Player
 {
 private:
-    int healthStatus;
+    int health;
     int bulletCount;
-    int healingPotionCount;
     double velocity;
+    bool healingPotion;
     bool shieldStatus;
     bool isJumping;
     float jumpVelocity;
@@ -25,6 +25,8 @@ private:
     sf::Clock animationClock;
     int runningFrame = 0;
     float frameDuration = 0.1f;
+
+    sf::RectangleShape healthBar;
 
 public:
     Player();
@@ -47,6 +49,8 @@ public:
     // Player's dimensions
 
     sf::FloatRect getPlayerDimensions();
+
+    sf::RectangleShape getHealthBar();
 
     // Other functionality (placeholders for future work)
     void reduceHealth(int damage);

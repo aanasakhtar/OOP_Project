@@ -181,7 +181,10 @@ void Game::renderGame()
     {
         window.draw(introText);
     }
-
+    if (gameStart)
+    {
+        window.draw(player.getHealthBar());
+    }
     window.draw(player.getPlayerSprite());
     window.display();
 }

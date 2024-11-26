@@ -5,8 +5,8 @@
 // player
 
 Player::Player()
-    : healthStatus(100), bulletCount(0), healingPotionCount(0), velocity(0.0),
-      shieldStatus(false), isJumping(false), jumpVelocity(0.0f) {}
+    : health(100), bulletCount(0), healingPotion(false), velocity(0.0),
+      shieldStatus(false), isJumping(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 50.f)) {}
 
 bool Player::loadPlayerAssets()
 {
@@ -58,9 +58,9 @@ void Player::updatePlayer(float platformHeight, float windowHeight, bool isGameR
         jumpVelocity += gravity;
 
         // Check if landed on platform
-        if (newY >= windowHeight - platformHeight - playerSprite.getGlobalBounds().height)
+        if (newY >= windowHeight - platformHeight - playerSprite.getGlobalBounds().height + 20.0f)
         {
-            newY = windowHeight - platformHeight - playerSprite.getGlobalBounds().height;
+            newY = windowHeight - platformHeight - playerSprite.getGlobalBounds().height + 20.0f;
             isJumping = false;
             jumpVelocity = 0.0f;
         }
@@ -104,12 +104,19 @@ sf::FloatRect Player::getPlayerDimensions()
     return playerSprite.getGlobalBounds();
 }
 
+sf::RectangleShape Player::getHealthBar()
+{
+    healthBar.setFillColor(sf::Color(119, 105, 78));
+    healthBar.setPosition(700, 100);
+    return healthBar;
+}
+
 // Placeholder methods for future functionality
 void Player::reduceHealth(int damage)
 {
-    healthStatus -= damage;
-    if (healthStatus < 0)
-        healthStatus = 0;
+    health -= damage;
+    if (health < 0)
+        health = 0;
 }
 
 void Player::activateShield()
