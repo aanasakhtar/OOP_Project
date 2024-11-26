@@ -15,6 +15,7 @@ private:
     sf::Font font;
     sf::Text scoreText;
     sf::Text introText;
+    sf::Text fireBallCount;
 
     // Background
     sf::Texture bgTexture;
@@ -33,6 +34,9 @@ private:
 
     // Player
     Player player;
+
+    // Player's fireball count
+    FireBall fireBall;
 
     // Score and Game State
     int scoreCounter;

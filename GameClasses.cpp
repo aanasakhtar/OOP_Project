@@ -5,7 +5,7 @@
 // player
 
 Player::Player()
-    : health(100), bulletCount(0), healingPotion(false), velocity(0.0),
+    : health(100), fireballsCount(0), healingPotion(false), velocity(0.0),
       shieldStatus(false), isJumping(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 50.f)) {}
 
 bool Player::loadPlayerAssets()
@@ -111,6 +111,12 @@ sf::RectangleShape Player::getHealthBar()
     return healthBar;
 }
 
+int Player::getFireBallCount()
+{
+    std::cout << "in" << std::endl;
+    return fireballsCount;
+}
+
 // Placeholder methods for future functionality
 void Player::reduceHealth(int damage)
 {
@@ -132,6 +138,41 @@ void Player::deactivateShield()
 bool Player::isShieldActive() const
 {
     return shieldStatus;
+}
+
+// Display
+FireBall::FireBall() : position(0, 0) {}
+
+bool FireBall::loadFireBallTexture()
+{
+    if (!texture.loadFromFile("fireball\\file.png"))
+    {
+        std::cerr << "Error: Could not load fireball texture" << std::endl;
+        return false;
+    }
+    sprite.setTexture(texture);
+    return true;
+}
+
+void FireBall::setFireBallPosition(float x, float y)
+{
+    position = {x, y};
+    sprite.setPosition(position);
+}
+
+void FireBall::drawFireBall(sf::RenderWindow &window) const
+{
+    window.draw(sprite);
+}
+
+sf::Vector2u FireBall::getFireBallDimensions() const
+{
+    return texture.getSize();
+}
+
+void FireBall::setFireBallScale(float scaleX, float scaleY)
+{
+    sprite.setScale(scaleX, scaleY);
 }
 
 // enemy class function
