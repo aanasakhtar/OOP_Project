@@ -177,19 +177,49 @@ void FireBall::setFireBallScale(float scaleX, float scaleY)
 
 // enemy class function
 // Enemy::Enemy() : damage_amount(0) {}
-// Enemy::Enemy(int damage) : damage_amount(damage) {}
-// int Enemy::get_damage()
-// {
-//     return damage_amount;
-// }
-// void Enemy::set_damage(int d)
-// {
-//     damage_amount = d;
-// }
+
+Enemy::Enemy(int damage) : damage_amount(damage) {}
+int Enemy::get_damage()
+{
+    return damage_amount;
+}
+void Enemy::set_damage(int d)
+{
+    damage_amount = d;
+}
 
 // // spider
 // Spider::Spider() : Enemy() {}
-// Spider::Spider(int damage) : Enemy(damage) {}
+Spider::Spider(int damage, int count) : Enemy(damage), countTillDeath(count) {}
+
+bool Spider::loadSpiderAssets()
+{
+    std::cout << "Loading spider assets..." << std::endl;
+
+    // Load running textures
+
+    runningTextures.resize(4);
+
+    for (int i = 0; i < 4; ++i)
+    {
+        std::string texturePath = "Gangsters_1\\Run" + std::to_string(i + 1) + ".png";
+        std::cout << "Loading: " << texturePath << std::endl;
+
+        if (!runningTextures[i].loadFromFile(texturePath))
+        {
+            std::cerr << "Error: Could not load " << texturePath << std::endl;
+            return false;
+        }
+
+        std::cout << "Successfully loaded: " << texturePath << std::endl;
+    }
+
+    std::cout << "Player assets loaded successfully." << std::endl;
+    spiderSprite.setTexture(spiderTexture);
+    spiderSprite.setScale(1.25f, 1.25f);
+
+    return true;
+}
 
 // // bats
 // Bats::Bats() : Enemy() {}

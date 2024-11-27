@@ -79,22 +79,22 @@ public:
     void setFireBallScale(float scaleX, float scaleY);
 };
 
-// class Enemy
-// {
-// private:
-//     int damage_amount;
+class Enemy
+{
+private:
+    int damage_amount;
 
-// public:
-//     Enemy();
-//     Enemy(int damage);
-//     int get_damage();
-//     void set_damage(int damage);
-// };
+public:
+    Enemy() = default;
+    Enemy(int damage);
+    int get_damage();
+    void set_damage(int damage);
+};
 
 // spider has acid balls
 // class AcidBall
 // {
-// private:
+// protected:
 //     int damage;
 
 // public:
@@ -105,16 +105,29 @@ public:
 //     void deactivate();                  // Deactivates after impact
 // };
 
-// class Spider : public Enemy
-// {
-// private:
-//     int health;
+class Spider : public Enemy
+{
+private:
+    int countTillDeath;
+    std::vector<sf::Texture> runningTextures;
+    sf::Texture spiderTexture;
+    sf::Sprite spiderSprite;
 
-// public:
-//     Spider();
-//     Spider(int damage);
-//     AcidBall throw_Acidball();
-// };
+    sf::Clock animationClock;
+    int runningFrame = 0;
+    float frameDuration = 0.1f;
+
+public:
+    Spider() = default;
+    Spider(int damage, int count);
+    bool loadSpiderAssets();
+    void updateEnemy(float platformHeight, float windowHeight, bool isGameRunning);
+    sf::Sprite getSpiderSprite() const;
+    void setSpiderPosition(float playerX, float playerY);
+    sf::FloatRect getSpiderDimensions();
+    void updateCTD();
+    // AcidBall throw_Acidball();
+};
 
 // class Bats : public Enemy
 // {
