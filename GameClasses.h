@@ -81,6 +81,7 @@ public:
     void setPosition(float x, float y);
     sf::FloatRect getGlobalBounds() const;
     void reduceHealth(int damage);
+    bool death_status()const;
 
 
 

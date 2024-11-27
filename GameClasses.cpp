@@ -164,6 +164,17 @@ void Enemy::setPosition(float x, float y){
 sf::FloatRect Enemy::getGlobalBounds() const{
     return EnemySprite.getGlobalBounds();
 }
+void Enemy::reduceHealth(int damage){
+        health -= damage;
+        if (health < 0)
+            isDead=true;
+}
+
+bool Enemy::death_status() const {
+    return isDead;
+}
+
+//
 // Display
 FireBall::FireBall() : position(0, 0) {}
 
