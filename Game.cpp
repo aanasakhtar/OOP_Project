@@ -57,6 +57,12 @@ void Game::loadAssets()
     introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
                           (window.getSize().y - introText.getLocalBounds().height) / 2);
 
+    fireBallCount.setFont(font);
+    fireBallCount.setCharacterSize(35);
+    fireBallCount.setFillColor(sf::Color(255, 255, 255, 100));
+    fireBallCount.setString(std::to_string(player.getFireBallCount()) + "x");
+    fireBallCount.setPosition(window.getSize().x - 250, 105);
+
     // Load Platform
     if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
     {
@@ -78,23 +84,30 @@ void Game::loadAssets()
         exit(EXIT_FAILURE);
     }
     player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f);
+
+    // Player's fireball count
+
+    if (!fireBall.loadFireBallTexture())
+    {
+        std::cerr << "Error: Could not load fireball texture!" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    fireBall.setFireBallPosition(2100 - fireBall.getFireBallDimensions().x / 2, 75);
+    fireBall.setFireBallScale(0.125, 0.125);
 }
 
 void Game::run()
 {
     while (window.isOpen())
     {
-        std::cout << "Running game loop..." << std::endl;
 
         handleEvents();
 
         if (gameStart)
         {
-            std::cout << "Game is running, updating game..." << std::endl;
             updateGame();
         }
 
-        std::cout << "Rendering game..." << std::endl;
         renderGame();
     }
 
@@ -181,7 +194,12 @@ void Game::renderGame()
     {
         window.draw(introText);
     }
-
+    else
+    {
+        window.draw(fireBallCount);
+        fireBall.drawFireBall(window);
+        window.draw(player.getHealthBar());
+    }
     window.draw(player.getPlayerSprite());
     window.display();
 }

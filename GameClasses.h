@@ -7,10 +7,10 @@
 class Player
 {
 private:
-    int healthStatus;
-    int bulletCount;
-    int healingPotionCount;
+    int health;
+    int fireballsCount;
     double velocity;
+    bool healingPotion;
     bool shieldStatus;
     bool isJumping;
     float jumpVelocity;
@@ -25,6 +25,8 @@ private:
     sf::Clock animationClock;
     int runningFrame = 0;
     float frameDuration = 0.1f;
+
+    sf::RectangleShape healthBar;
 
 public:
     Player();
@@ -48,6 +50,10 @@ public:
 
     sf::FloatRect getPlayerDimensions();
 
+    sf::RectangleShape getHealthBar();
+
+    int getFireBallCount();
+
     // Other functionality (placeholders for future work)
     void reduceHealth(int damage);
     void activateShield();
@@ -65,8 +71,6 @@ protected:
     int health;
     int damage;
     bool isDead;
-
-
 public:
     Enemy(int damage);
     virtual ~Enemy();
@@ -83,6 +87,33 @@ public:
     
     
 };
+
+
+class FireBall
+{
+private:
+    sf::Texture texture;
+    sf::Sprite sprite;
+    sf::Vector2f position;
+
+public:
+    FireBall();
+    bool loadFireBallTexture();
+    bool loadFireBallFont();
+    void setFireBallPosition(float x, float y);
+    void drawFireBall(sf::RenderWindow &window) const;
+    sf::Vector2u getFireBallDimensions() const;
+    void updateCount(unsigned int newCount);
+    void setFireBallScale(float scaleX, float scaleY);
+};
+
+// class Enemy
+// {
+// private:
+//     int damage_amount;
+
+
+
 
 // spider has acid balls
 class AcidBall
