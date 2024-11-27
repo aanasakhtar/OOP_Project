@@ -140,6 +140,41 @@ bool Player::isShieldActive() const
     return shieldStatus;
 }
 
+//enemy class functions
+Enemy::Enemy(int d):damage(d),health(0),isDead(false),velocity(0.0f){}
+void Enemy::loadEnemyAssets(const std::string& texturePath){
+    std::cout << "Loading enemy assets..." << std::endl;
+
+    // Load idle texture
+    if (!idleTexture.loadFromFile(texturePath))
+    {
+        std::cerr << "Error: Could not load idle texture." << std::endl;
+        
+    }
+    EnemySprite.setTexture(idleTexture);
+    EnemySprite.setScale(1.25f, 1.25f);
+}
+
+void Enemy::renderEnemy(sf::RenderWindow& window){
+    window.draw(EnemySprite);
+}
+void Enemy::setPosition(float x, float y){
+    EnemySprite.setPosition(x, y);
+}
+sf::FloatRect Enemy::getGlobalBounds() const{
+    return EnemySprite.getGlobalBounds();
+}
+void Enemy::reduceHealth(int damage){
+        health -= damage;
+        if (health < 0)
+            isDead=true;
+}
+
+bool Enemy::death_status() const {
+    return isDead;
+}
+
+//
 // Display
 FireBall::FireBall() : position(0, 0) {}
 
@@ -188,6 +223,7 @@ void Enemy::set_damage(int d)
     damage_amount = d;
 }
 
+<<<<<<< HEAD
 // // spider
 // Spider::Spider() : Enemy() {}
 Spider::Spider(int damage, int count) : Enemy(damage), countTillDeath(count) {}
@@ -220,10 +256,9 @@ bool Spider::loadSpiderAssets()
 
     return true;
 }
+=======
+>>>>>>> 6bfac728d13717f6622e9c30e74a7211a1084912
 
-// // bats
-// Bats::Bats() : Enemy() {}
-// Bats::Bats(int damage) : Enemy(damage) {}
 
 // // CollectableItem
 // CollectableItems::CollectableItems() {}

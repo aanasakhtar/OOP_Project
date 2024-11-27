@@ -61,6 +61,30 @@ public:
     bool isShieldActive() const;
 };
 
+class Enemy
+{
+protected:
+    sf::Texture idleTexture;
+    std::vector<sf::Texture> movingTextures;
+    sf::Sprite EnemySprite;
+    float velocity;
+    int health;
+    int damage;
+    bool isDead;
+
+public:
+    Enemy(int damage);
+    virtual ~Enemy();
+    virtual void loadEnemyAssets(const std::string &texturePath);
+    virtual void updateEnemy(float deltaTime, float platformHeight, float windowHeight, bool isGameRunning) = 0;
+
+    void renderEnemy(sf::RenderWindow &window);
+    void setPosition(float x, float y);
+    sf::FloatRect getGlobalBounds() const;
+    void reduceHealth(int damage);
+    bool death_status() const;
+};
+
 class FireBall
 {
 private:
@@ -84,26 +108,26 @@ class Enemy
 private:
     int damage_amount;
 
+    // public:
+    //     Enemy();
+    //     Enemy(int damage);
+    //     int get_damage();
+    //     void set_damage(int damage);
+    // };
+
+    // spider has acid balls
+    // class AcidBall
+    // {
+    // private:
+    //     int damage;
+
 public:
-    Enemy() = default;
-    Enemy(int damage);
-    int get_damage();
-    void set_damage(int damage);
+    AcidBall(int dmg);
+    void move_left();                   // Moves acid ball leftward
+    void damage_player(Player &player); // Inflicts damage if it hits player
+    bool is_hit(const Player &player);  // Checks collision with player
+    void deactivate();                  // Deactivates after impact
 };
-
-// spider has acid balls
-// class AcidBall
-// {
-// protected:
-//     int damage;
-
-// public:
-//     AcidBall(int dmg);
-//     void move_left();                   // Moves acid ball leftward
-//     void damage_player(Player &player); // Inflicts damage if it hits player
-//     bool is_hit(const Player &player);  // Checks collision with player
-//     void deactivate();                  // Deactivates after impact
-// };
 
 class Spider : public Enemy
 {
