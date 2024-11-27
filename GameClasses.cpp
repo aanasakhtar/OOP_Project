@@ -113,7 +113,6 @@ sf::RectangleShape Player::getHealthBar()
 
 int Player::getFireBallCount()
 {
-    std::cout << "in" << std::endl;
     return fireballsCount;
 }
 
@@ -140,41 +139,6 @@ bool Player::isShieldActive() const
     return shieldStatus;
 }
 
-//enemy class functions
-Enemy::Enemy(int d):damage(d),health(0),isDead(false),velocity(0.0f){}
-void Enemy::loadEnemyAssets(const std::string& texturePath){
-    std::cout << "Loading enemy assets..." << std::endl;
-
-    // Load idle texture
-    if (!idleTexture.loadFromFile(texturePath))
-    {
-        std::cerr << "Error: Could not load idle texture." << std::endl;
-        
-    }
-    EnemySprite.setTexture(idleTexture);
-    EnemySprite.setScale(1.25f, 1.25f);
-}
-
-void Enemy::renderEnemy(sf::RenderWindow& window){
-    window.draw(EnemySprite);
-}
-void Enemy::setPosition(float x, float y){
-    EnemySprite.setPosition(x, y);
-}
-sf::FloatRect Enemy::getGlobalBounds() const{
-    return EnemySprite.getGlobalBounds();
-}
-void Enemy::reduceHealth(int damage){
-        health -= damage;
-        if (health < 0)
-            isDead=true;
-}
-
-bool Enemy::death_status() const {
-    return isDead;
-}
-
-//
 // Display
 FireBall::FireBall() : position(0, 0) {}
 
@@ -210,55 +174,143 @@ void FireBall::setFireBallScale(float scaleX, float scaleY)
     sprite.setScale(scaleX, scaleY);
 }
 
-// enemy class function
-// Enemy::Enemy() : damage_amount(0) {}
+// enemy class functions
+Enemy::Enemy(int damage, int health, float velocity)
+    : damage(damage), health(health), velocity(velocity), isDead(false) {}
 
-Enemy::Enemy(int damage) : damage_amount(damage) {}
-int Enemy::get_damage()
+bool Enemy::loadEnemyAssets(const std::vector<std::string> &movingTexturePaths)
 {
-    return damage_amount;
-}
-void Enemy::set_damage(int d)
-{
-    damage_amount = d;
-}
-
-<<<<<<< HEAD
-// // spider
-// Spider::Spider() : Enemy() {}
-Spider::Spider(int damage, int count) : Enemy(damage), countTillDeath(count) {}
-
-bool Spider::loadSpiderAssets()
-{
-    std::cout << "Loading spider assets..." << std::endl;
-
-    // Load running textures
-
-    runningTextures.resize(4);
-
-    for (int i = 0; i < 4; ++i)
+    // Load moving textures
+    movingTextures.resize(movingTexturePaths.size());
+    for (int i = 0; i < movingTexturePaths.size(); ++i)
     {
-        std::string texturePath = "Gangsters_1\\Run" + std::to_string(i + 1) + ".png";
-        std::cout << "Loading: " << texturePath << std::endl;
-
-        if (!runningTextures[i].loadFromFile(texturePath))
+        if (!movingTextures[i].loadFromFile(movingTexturePaths[i]))
         {
-            std::cerr << "Error: Could not load " << texturePath << std::endl;
+            std::cerr << "Error: Could not load moving texture: " << movingTexturePaths[i] << std::endl;
             return false;
         }
-
-        std::cout << "Successfully loaded: " << texturePath << std::endl;
     }
 
-    std::cout << "Player assets loaded successfully." << std::endl;
-    spiderSprite.setTexture(spiderTexture);
-    spiderSprite.setScale(1.25f, 1.25f);
+    std::cout << "Enemies assets loaded" << std::endl;
 
     return true;
 }
-=======
->>>>>>> 6bfac728d13717f6622e9c30e74a7211a1084912
 
+void Enemy::renderEnemy(sf::RenderWindow &window)
+{
+    window.draw(sprite);
+}
+
+void Enemy::setPosition(float x, float y)
+{
+    sprite.setPosition(x, y);
+}
+
+sf::FloatRect Enemy::getGlobalBounds() const
+{
+    return sprite.getGlobalBounds();
+}
+
+void Enemy::reduceHealth(int damage)
+{
+    health -= damage;
+    if (health <= 0)
+        isDead = true;
+}
+
+bool Enemy::deathStatus() const
+{
+    return isDead;
+}
+
+//
+
+// bat
+
+Bat::Bat(int damage, int health, float velocity, int count)
+    : Enemy(damage, health, velocity), countTillDeath(count) {}
+
+bool Bat::loadBatAssets(const std::vector<std::string> &movingTexturePaths)
+{
+    return loadEnemyAssets(movingTexturePaths); // Reuse base class method
+}
+
+void Bat::updateEnemy(float backgroundVelocity, bool isGameRunning)
+{
+    if (isGameRunning && !isDead)
+    {
+        // Update the enemy position relative to the background velocity
+        float newX = sprite.getPosition().x - backgroundVelocity * 2.5; // Move left with background
+        float newY = sprite.getPosition().y;                            // Position relative to player
+        // std::cout << newY << std::endl;
+
+        // Set the scale to ensure the enemy faces right
+        sprite.setScale(-0.25f, 0.25f); // Maintain proper size
+
+        // Update the position
+        if (newX > -200)
+            setPosition(newX, newY);
+        else
+            delete this;
+
+        // Handle animation
+        if (animationClock.getElapsedTime().asSeconds() > frameDuration)
+        {
+            runningFrame = (runningFrame + 1) % movingTextures.size();
+            sprite.setTexture(movingTextures[runningFrame]);
+            animationClock.restart();
+        }
+    }
+}
+
+void Bat::updateCTD()
+{
+    if (isDead && countTillDeath > 0)
+        countTillDeath--;
+}
+
+// spider
+Spider::Spider(int damage, int health, float velocity, int count)
+    : Enemy(damage, health, velocity), countTillDeath(count) {}
+
+bool Spider::loadSpiderAssets(const std::vector<std::string> &movingTexturePaths)
+{
+    return loadEnemyAssets(movingTexturePaths); // Reuse base class method
+}
+
+void Spider::updateEnemy(float backgroundVelocity, bool isGameRunning)
+{
+    if (isGameRunning && !isDead)
+    {
+        // Update the enemy position relative to the background velocity
+        float newX = sprite.getPosition().x - backgroundVelocity * 2.5; // Move left with background
+        float newY = sprite.getPosition().y;                            // Position relative to player
+        // std::cout << newY << std::endl;
+
+        // Set the scale to ensure the enemy faces right
+        sprite.setScale(-0.25f, 0.25f); // Maintain proper size
+
+        // Update the position
+        if (newX > -200)
+            setPosition(newX, newY);
+        else
+            delete this;
+
+        // Handle animation
+        if (animationClock.getElapsedTime().asSeconds() > frameDuration)
+        {
+            runningFrame = (runningFrame + 1) % movingTextures.size();
+            sprite.setTexture(movingTextures[runningFrame]);
+            animationClock.restart();
+        }
+    }
+}
+
+void Spider::updateCTD()
+{
+    if (isDead && countTillDeath > 0)
+        countTillDeath--;
+}
 
 // // CollectableItem
 // CollectableItems::CollectableItems() {}

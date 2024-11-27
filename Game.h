@@ -38,6 +38,11 @@ private:
     // Player's fireball count
     FireBall fireBall;
 
+    // Enemy
+    Bat bat;
+
+    Spider spider;
+
     // Score and Game State
     int scoreCounter;
     sf::Clock scoreClock;

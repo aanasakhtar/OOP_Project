@@ -61,30 +61,6 @@ public:
     bool isShieldActive() const;
 };
 
-class Enemy
-{
-protected:
-    sf::Texture idleTexture;
-    std::vector<sf::Texture> movingTextures;
-    sf::Sprite EnemySprite;
-    float velocity;
-    int health;
-    int damage;
-    bool isDead;
-
-public:
-    Enemy(int damage);
-    virtual ~Enemy();
-    virtual void loadEnemyAssets(const std::string &texturePath);
-    virtual void updateEnemy(float deltaTime, float platformHeight, float windowHeight, bool isGameRunning) = 0;
-
-    void renderEnemy(sf::RenderWindow &window);
-    void setPosition(float x, float y);
-    sf::FloatRect getGlobalBounds() const;
-    void reduceHealth(int damage);
-    bool death_status() const;
-};
-
 class FireBall
 {
 private:
@@ -103,29 +79,96 @@ public:
     void setFireBallScale(float scaleX, float scaleY);
 };
 
-class Spider : public Enemy
+class Enemy
 {
-private:
-    int countTillDeath;
-    std::vector<sf::Texture> runningTextures;
-    sf::Texture spiderTexture;
-    sf::Sprite spiderSprite;
+protected:
+    std::vector<sf::Texture> movingTextures; // Shared across all enemies
+    sf::Sprite sprite;                       // Shared sprite
+    float velocity;                          // Movement velocity
+    int health;                              // Enemy health
+    int damage;                              // Damage dealt by the enemy
+    bool isDead;                             // Death status flag
 
     sf::Clock animationClock;
     int runningFrame = 0;
     float frameDuration = 0.1f;
 
 public:
-    Spider() = default;
-    Spider(int damage, int count);
-    bool loadSpiderAssets();
-    void updateEnemy(float platformHeight, float windowHeight, bool isGameRunning);
-    sf::Sprite getSpiderSprite() const;
-    void setSpiderPosition(float playerX, float playerY);
-    sf::FloatRect getSpiderDimensions();
-    void updateCTD();
-    // AcidBall throw_Acidball();
+    Enemy() = default;
+    Enemy(int damage, int health, float velocity);
+    virtual ~Enemy() = default;
+
+    virtual bool loadEnemyAssets(const std::vector<std::string> &movingTexturePaths);
+    virtual void updateEnemy(float deltaTime, bool isGameRunning) = 0;
+
+    void renderEnemy(sf::RenderWindow &window);
+    void setPosition(float x, float y);
+    sf::FloatRect getGlobalBounds() const;
+    void reduceHealth(int damage);
+    bool deathStatus() const;
 };
+
+class Bat : public Enemy
+{
+private:
+    int countTillDeath; // Specific to Bat
+
+public:
+    Bat() = default;
+    Bat(int damage, int health, float velocity, int count);
+
+    // Load bat-specific assets
+    bool loadBatAssets(const std::vector<std::string> &movingTexturePaths);
+
+    // Override update logic
+    void updateEnemy(float backgroundVelocity, bool isGameRunning) override;
+
+    // Getters and setters
+    void updateCTD();
+};
+
+class Spider : public Enemy
+{
+private:
+    int countTillDeath; // Specific to Bat
+
+public:
+    Spider() = default;
+    Spider(int damage, int health, float velocity, int count);
+
+    // Load bat-specific assets
+    bool loadSpiderAssets(const std::vector<std::string> &movingTexturePaths);
+
+    // Override update logic
+    void updateEnemy(float backgroundVelocity, bool isGameRunning) override;
+
+    // Getters and setters
+    void updateCTD();
+};
+
+// class Spider : public Enemy
+// {
+// private:
+//     int countTillDeath;
+//     std::vector<sf::Texture> runningTextures;
+//     sf::Texture spiderTexture;
+//     sf::Sprite spiderSprite;
+
+//     sf::Clock animationClock;
+//     int runningFrame = 0;
+//     float frameDuration = 0.1f;
+
+// public:
+//     Spider() = default;
+//     Spider(int damage, int count);
+//     bool loadSpiderAssets();
+//     void updateEnemy(float platformHeight, float windowHeight, bool isGameRunning);
+//     sf::Sprite getSpiderSprite() const;
+//     void setSpiderPosition(float playerX, float playerY);
+//     sf::FloatRect getSpiderDimensions();
+//     void updateCTD();
+//     // AcidBall throw_Acidball();
+// };
 
 // class Bats : public Enemy
 // {

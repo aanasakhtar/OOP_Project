@@ -94,6 +94,37 @@ void Game::loadAssets()
     }
     fireBall.setFireBallPosition(2100 - fireBall.getFireBallDimensions().x / 2, 75);
     fireBall.setFireBallScale(0.125, 0.125);
+
+    // Enemies
+    // Bat
+    std::vector<std::string> paths;
+
+    paths.push_back("Fly\\0_Monster_Fly_000.png");
+    paths.push_back("Fly\\0_Monster_Fly_004.png");
+    paths.push_back("Fly\\0_Monster_Fly_008.png");
+    paths.push_back("Fly\\0_Monster_Fly_012.png");
+
+    if (!bat.loadEnemyAssets(paths))
+    {
+        std::cerr << "Error: Could not load bats assets" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    bat.setPosition(window.getSize().x + bat.getGlobalBounds().width, player.getPlayerDimensions().top + 10.f);
+
+    // Spider
+    paths.clear();
+    paths.push_back("enemy2\\character.jpg");
+    paths.push_back("enemy2\\character.jpg");
+    paths.push_back("enemy2\\character.jpg");
+    paths.push_back("enemy2\\character.jpg");
+    if (!spider.loadEnemyAssets(paths))
+    {
+        std::cerr << "Error: Could not load spider assets" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    spider.setPosition(window.getSize().x + bat.getGlobalBounds().width, 960 - platformTileHeight);
 }
 
 void Game::run()
@@ -142,6 +173,8 @@ void Game::updateGame()
     updatePlatform();
     updateScore();
     player.updatePlayer(platformSprite.getGlobalBounds().height, window.getSize().y, gameStart);
+    bat.updateEnemy(backgroundVelocity, gameStart);
+    spider.updateEnemy(backgroundVelocity, gameStart);
 }
 
 void Game::updateBackground()
@@ -201,5 +234,7 @@ void Game::renderGame()
         window.draw(player.getHealthBar());
     }
     window.draw(player.getPlayerSprite());
+    bat.renderEnemy(window);
+    spider.renderEnemy(window);
     window.display();
 }
