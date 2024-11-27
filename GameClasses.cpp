@@ -127,25 +127,32 @@ bool Player::isShieldActive() const
     return shieldStatus;
 }
 
-// enemy class function
-// Enemy::Enemy() : damage_amount(0) {}
-// Enemy::Enemy(int damage) : damage_amount(damage) {}
-// int Enemy::get_damage()
-// {
-//     return damage_amount;
-// }
-// void Enemy::set_damage(int d)
-// {
-//     damage_amount = d;
-// }
+//enemy class functions
+Enemy::Enemy(int d):damage(d),health(0),isDead(false),velocity(0.0f){}
+void Enemy::loadEnemyAssets(const std::string& texturePath){
+    std::cout << "Loading enemy assets..." << std::endl;
 
-// // spider
-// Spider::Spider() : Enemy() {}
-// Spider::Spider(int damage) : Enemy(damage) {}
+    // Load idle texture
+    if (!idleTexture.loadFromFile(texturePath))
+    {
+        std::cerr << "Error: Could not load idle texture." << std::endl;
+        
+    }
+    EnemySprite.setTexture(idleTexture);
+    EnemySprite.setScale(1.25f, 1.25f);
+}
 
-// // bats
-// Bats::Bats() : Enemy() {}
-// Bats::Bats(int damage) : Enemy(damage) {}
+void Enemy::renderEnemy(sf::RenderWindow& window){
+    window.draw(EnemySprite);
+}
+void Enemy::setPosition(float x, float y){
+    EnemySprite.setPosition(x, y);
+}
+sf::FloatRect Enemy::getGlobalBounds() const{
+    return EnemySprite.getGlobalBounds();
+}
+
+
 
 // // CollectableItem
 // CollectableItems::CollectableItems() {}
