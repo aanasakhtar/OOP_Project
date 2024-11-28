@@ -60,7 +60,6 @@ void Game::loadAssets()
     fireBallCount.setFont(font);
     fireBallCount.setCharacterSize(35);
     fireBallCount.setFillColor(sf::Color(255, 255, 255, 100));
-    fireBallCount.setString(std::to_string(player.getFireBallCount()) + "x");
     fireBallCount.setPosition(window.getSize().x - 250, 105);
 
     // Load Platform
@@ -97,34 +96,34 @@ void Game::loadAssets()
 
     // Enemies
     // Bat
-    std::vector<std::string> paths;
-
-    paths.push_back("Fly\\0_Monster_Fly_000.png");
-    paths.push_back("Fly\\0_Monster_Fly_004.png");
-    paths.push_back("Fly\\0_Monster_Fly_008.png");
-    paths.push_back("Fly\\0_Monster_Fly_012.png");
-
-    if (!bat.loadEnemyAssets(paths))
+    auto bat = std::make_unique<Bat>(10, 3, backgroundVelocity, 5); // Damage, health, velocity, countTillDeath
+    std::vector<std::string> batPaths = {
+        "Fly\\0_Monster_Fly_000.png",
+        "Fly\\0_Monster_Fly_004.png",
+        "Fly\\0_Monster_Fly_008.png",
+        "Fly\\0_Monster_Fly_012.png"};
+    if (!bat->loadEnemyAssets(batPaths))
     {
         std::cerr << "Error: Could not load bats assets" << std::endl;
         exit(EXIT_FAILURE);
     }
+    bat->setPosition(window.getSize().x + bat->getGlobalBounds().width, player.getPlayerDimensions().top + 10.f);
+    enemies.push_back(std::move(bat));
 
-    bat.setPosition(window.getSize().x + bat.getGlobalBounds().width, player.getPlayerDimensions().top + 10.f);
-
-    // Spider
-    paths.clear();
-    paths.push_back("enemy2\\character.jpg");
-    paths.push_back("enemy2\\character.jpg");
-    paths.push_back("enemy2\\character.jpg");
-    paths.push_back("enemy2\\character.jpg");
-    if (!spider.loadEnemyAssets(paths))
+    // Create and add a Spider
+    auto spider = std::make_unique<Spider>(15, 5, backgroundVelocity, 3); // Damage, health, velocity, countTillDeath
+    std::vector<std::string> spiderPaths = {
+        "Walking\\0_Monster_Walking_000.png",
+        "Walking\\0_Monster_Walking_004.png",
+        "Walking\\0_Monster_Walking_008.png",
+        "Walking\\0_Monster_Walking_012.png"};
+    if (!spider->loadEnemyAssets(spiderPaths))
     {
         std::cerr << "Error: Could not load spider assets" << std::endl;
         exit(EXIT_FAILURE);
     }
-
-    spider.setPosition(window.getSize().x + bat.getGlobalBounds().width, 960 - platformTileHeight);
+    spider->setPosition(window.getSize().x + spider->getGlobalBounds().width, player.getPlayerDimensions().top + 100);
+    enemies.push_back(std::move(spider));
 }
 
 void Game::run()
@@ -172,9 +171,19 @@ void Game::updateGame()
     updateBackground();
     updatePlatform();
     updateScore();
+    updateFireBallCount();
     player.updatePlayer(platformSprite.getGlobalBounds().height, window.getSize().y, gameStart);
-    bat.updateEnemy(backgroundVelocity, gameStart);
-    spider.updateEnemy(backgroundVelocity, gameStart);
+    for (auto &enemy : enemies)
+    {
+        enemy->updateEnemy(backgroundVelocity, gameStart);
+    }
+
+    // Remove enemies that are off-screen or marked for deletion
+    enemies.erase(
+        std::remove_if(enemies.begin(), enemies.end(),
+                       [](const std::unique_ptr<Enemy> &enemy)
+                       { return enemy->shouldDelete(); }),
+        enemies.end());
 }
 
 void Game::updateBackground()
@@ -208,33 +217,38 @@ void Game::updateScore()
     scoreText.setString("Score: " + std::to_string(scoreCounter));
 }
 
+void Game::updateFireBallCount()
+{
+    fireBallCount.setString(std::to_string(player.getFireBallCount()) + "x");
+}
+
 void Game::renderGame()
 {
-    window.clear();
+    window.clear(); // Clear the screen
 
+    // Draw background
     window.draw(bgSprite1);
     window.draw(bgSprite2);
 
+    // Draw platform
     for (int i = 0; i < numTiles; ++i)
     {
         platformSprite.setPosition(i * platformTileWidth - platformOffset, window.getSize().y - platformTileHeight);
         window.draw(platformSprite);
     }
 
-    window.draw(scoreText);
+    // Draw enemies
+    for (const auto &enemy : enemies)
+    {
+        enemy->renderEnemy(window);
+    }
 
-    if (!gameStart)
-    {
-        window.draw(introText);
-    }
-    else
-    {
-        window.draw(fireBallCount);
-        fireBall.drawFireBall(window);
-        window.draw(player.getHealthBar());
-    }
+    // Draw player
     window.draw(player.getPlayerSprite());
-    bat.renderEnemy(window);
-    spider.renderEnemy(window);
-    window.display();
+
+    // Draw score and UI elements
+    window.draw(scoreText);
+    window.draw(fireBallCount);
+    fireBall.drawFireBall(window, gameStart);
+    window.display(); // Display everything on the screen
 }

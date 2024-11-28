@@ -159,9 +159,10 @@ void FireBall::setFireBallPosition(float x, float y)
     sprite.setPosition(position);
 }
 
-void FireBall::drawFireBall(sf::RenderWindow &window) const
+void FireBall::drawFireBall(sf::RenderWindow &window, bool isGameRunning) const
 {
-    window.draw(sprite);
+    if (isGameRunning)
+        window.draw(sprite);
 }
 
 sf::Vector2u FireBall::getFireBallDimensions() const
@@ -177,6 +178,16 @@ void FireBall::setFireBallScale(float scaleX, float scaleY)
 // enemy class functions
 Enemy::Enemy(int damage, int health, float velocity)
     : damage(damage), health(health), velocity(velocity), isDead(false) {}
+
+void Enemy::markForDeletion()
+{
+    isDead = true;
+}
+
+bool Enemy::shouldDelete() const
+{
+    return isDead;
+}
 
 bool Enemy::loadEnemyAssets(const std::vector<std::string> &movingTexturePaths)
 {
@@ -240,18 +251,18 @@ void Bat::updateEnemy(float backgroundVelocity, bool isGameRunning)
     if (isGameRunning && !isDead)
     {
         // Update the enemy position relative to the background velocity
-        float newX = sprite.getPosition().x - backgroundVelocity * 2.5; // Move left with background
-        float newY = sprite.getPosition().y;                            // Position relative to player
-        // std::cout << newY << std::endl;
-
-        // Set the scale to ensure the enemy faces right
-        sprite.setScale(-0.25f, 0.25f); // Maintain proper size
-
-        // Update the position
+        float newX = sprite.getPosition().x - backgroundVelocity * 2.5; // Move left
+        float newY = sprite.getPosition().y;                            // Maintain vertical position
+        sprite.setScale(-0.25f, 0.25f);
+        // Update the position or mark for deletion if off-screen
         if (newX > -200)
+        {
             setPosition(newX, newY);
+        }
         else
-            delete this;
+        {
+            markForDeletion(); // Mark this enemy for removal instead of deleting it
+        }
 
         // Handle animation
         if (animationClock.getElapsedTime().asSeconds() > frameDuration)
@@ -269,6 +280,11 @@ void Bat::updateCTD()
         countTillDeath--;
 }
 
+void Bat::renderEnemy(sf::RenderWindow &window)
+{
+    window.draw(sprite); // Render the Spider's sprite
+}
+
 // spider
 Spider::Spider(int damage, int health, float velocity, int count)
     : Enemy(damage, health, velocity), countTillDeath(count) {}
@@ -283,18 +299,20 @@ void Spider::updateEnemy(float backgroundVelocity, bool isGameRunning)
     if (isGameRunning && !isDead)
     {
         // Update the enemy position relative to the background velocity
-        float newX = sprite.getPosition().x - backgroundVelocity * 2.5; // Move left with background
-        float newY = sprite.getPosition().y;                            // Position relative to player
-        // std::cout << newY << std::endl;
+        float newX = sprite.getPosition().x - backgroundVelocity * 2.5; // Move left
+        float newY = sprite.getPosition().y;                            // Maintain vertical position
 
-        // Set the scale to ensure the enemy faces right
-        sprite.setScale(-0.25f, 0.25f); // Maintain proper size
+        sprite.setScale(-0.25f, 0.25f);
 
-        // Update the position
+        // Update the position or mark for deletion if off-screen
         if (newX > -200)
+        {
             setPosition(newX, newY);
+        }
         else
-            delete this;
+        {
+            markForDeletion(); // Mark this enemy for removal instead of deleting it
+        }
 
         // Handle animation
         if (animationClock.getElapsedTime().asSeconds() > frameDuration)
@@ -310,6 +328,11 @@ void Spider::updateCTD()
 {
     if (isDead && countTillDeath > 0)
         countTillDeath--;
+}
+
+void Spider::renderEnemy(sf::RenderWindow &window)
+{
+    window.draw(sprite); // Render the Spider's sprite
 }
 
 // // CollectableItem

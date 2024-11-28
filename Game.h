@@ -39,9 +39,7 @@ private:
     FireBall fireBall;
 
     // Enemy
-    Bat bat;
-
-    Spider spider;
+    std::vector<std::unique_ptr<Enemy>> enemies;
 
     // Score and Game State
     int scoreCounter;
@@ -56,6 +54,7 @@ private:
     void updatePlatform();
     void updateBackground();
     void updateScore();
+    void updateFireBallCount();
 
 public:
     Game();     // Constructor

@@ -73,7 +73,7 @@ public:
     bool loadFireBallTexture();
     bool loadFireBallFont();
     void setFireBallPosition(float x, float y);
-    void drawFireBall(sf::RenderWindow &window) const;
+    void drawFireBall(sf::RenderWindow &window, bool isGameRunning) const;
     sf::Vector2u getFireBallDimensions() const;
     void updateCount(unsigned int newCount);
     void setFireBallScale(float scaleX, float scaleY);
@@ -98,10 +98,13 @@ public:
     Enemy(int damage, int health, float velocity);
     virtual ~Enemy() = default;
 
-    virtual bool loadEnemyAssets(const std::vector<std::string> &movingTexturePaths);
-    virtual void updateEnemy(float deltaTime, bool isGameRunning) = 0;
+    void markForDeletion();
+    bool shouldDelete() const;
 
-    void renderEnemy(sf::RenderWindow &window);
+    virtual void updateEnemy(float backgroundVelocity, bool isGameRunning) = 0;
+    virtual void renderEnemy(sf::RenderWindow &window) = 0;
+    virtual bool loadEnemyAssets(const std::vector<std::string> &movingTexturePaths);
+
     void setPosition(float x, float y);
     sf::FloatRect getGlobalBounds() const;
     void reduceHealth(int damage);
@@ -125,6 +128,9 @@ public:
 
     // Getters and setters
     void updateCTD();
+
+    // Render on screen
+    void renderEnemy(sf::RenderWindow &window);
 };
 
 class Spider : public Enemy
@@ -144,6 +150,9 @@ public:
 
     // Getters and setters
     void updateCTD();
+
+    // Render on the screen
+    void renderEnemy(sf::RenderWindow &window);
 };
 
 // class Spider : public Enemy
