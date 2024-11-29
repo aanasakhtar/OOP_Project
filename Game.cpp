@@ -109,6 +109,7 @@ void Game::loadAssets()
     }
     bat->setPosition(window.getSize().x + bat->getGlobalBounds().width, player.getPlayerDimensions().top + 10.f);
     enemies.push_back(std::move(bat));
+    std::cout << "Bat added to enemies vector. Current size: " << enemies.size() << std::endl;
 
     // Create and add a Spider
     auto spider = std::make_unique<Spider>(15, 5, backgroundVelocity, 3); // Damage, health, velocity, countTillDeath
@@ -124,21 +125,29 @@ void Game::loadAssets()
     }
     spider->setPosition(window.getSize().x + spider->getGlobalBounds().width, player.getPlayerDimensions().top + 100);
     enemies.push_back(std::move(spider));
+    std::cout << "Spider added to enemies vector. Current size: " << enemies.size() << std::endl;
+
+    // Check if the enemies vector is empty
+    if (enemies.empty())
+    {
+        std::cerr << "Enemies vector is empty!" << std::endl;
+    }
+    else
+    {
+        std::cout << "Enemies vector has " << enemies.size() << " enemies." << std::endl;
+    }
 }
 
 void Game::run()
 {
     while (window.isOpen())
     {
-
         handleEvents();
 
         updateGame();
 
         renderGame();
     }
-
-    std::cout << "Window closed." << std::endl;
 }
 
 void Game::handleEvents()
@@ -153,25 +162,27 @@ void Game::handleEvents()
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
         {
-            if (gameState == GameState::Intro || gameState == GameState::GameOver)
+            if (gameState == GameState::GameOver)
             {
-                // Reset the game and start running
+                // Reset the game but do not clear enemies
                 resetGame();
-                gameState = GameState::Running;
-                player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f);
+                gameState = GameState::Running; // Transition to running state
+                std::cout << "Game started, GameState: Running" << std::endl;
             }
             else if (gameState == GameState::Running)
             {
-                // Pause the game
+                // Pause the game (transition back to intro screen)
                 gameState = GameState::Intro;
+                std::cout << "Game paused, GameState: Intro" << std::endl;
+            }
+            else if (gameState == GameState::Intro)
+            {
+                gameState = GameState::Running; // Transition to running state
+                std::cout << "Game started, GameState: Running" << std::endl;
             }
         }
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up)
-        {
-            player.jump();
-        }
-        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
         {
             player.jump();
         }
@@ -287,7 +298,7 @@ void Game::renderGame()
     // Draw enemies if the game is running
     if (gameState == GameState::Running)
     {
-        for (const auto &enemy : enemies)
+        for (auto &enemy : enemies)
         {
             enemy->renderEnemy(window);
         }

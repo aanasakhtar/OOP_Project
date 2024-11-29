@@ -114,31 +114,31 @@ sf::RectangleShape Player::getHealthBar()
     return healthBar;
 }
 
-void Player::reduceHealth(int damage)
-{
-    health -= damage;
-    if (damage == 5)
-    {
-        healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 25, healthBar.getSize().y));
-    }
-    else if (damage == 10)
-    {
-        healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 50, healthBar.getSize().y));
-    }
-    else if (damage == 20)
-    {
-        healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 100, healthBar.getSize().y));
-    }
-    else if (damage == 30)
-    {
-        healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 150, healthBar.getSize().y));
-    }
-    if (health < 0)
-    {
-        health = 0;
-        isDead = true;
-    }
-}
+// void Player::reduceHealth(int damage)
+// {
+//     health -= damage;
+//     if (damage == 5)
+//     {
+//         healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 25, healthBar.getSize().y));
+//     }
+//     else if (damage == 10)
+//     {
+//         healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 50, healthBar.getSize().y));
+//     }
+//     else if (damage == 20)
+//     {
+//         healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 100, healthBar.getSize().y));
+//     }
+//     else if (damage == 30)
+//     {
+//         healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 150, healthBar.getSize().y));
+//     }
+//     if (health < 0)
+//     {
+//         health = 0;
+//         isDead = true;
+//     }
+// }
 
 // qasim's reduce health function
 void Player::reduceHealth(int damage)
@@ -215,6 +215,12 @@ bool Player::isShieldActive() const
 {
     return shieldStatus;
 }
+// void Player::throwFireball(){
+//     if (this->fireballsCount>0){
+//         FireBall ball;
+//         ball.setFireBallPosition(playerSprite.getGlobalBounds().top().x,playerSprite.getGlobalBounds().top().y)
+//     }
+// }
 
 // Display
 FireBall::FireBall() : position(0, 0) {}

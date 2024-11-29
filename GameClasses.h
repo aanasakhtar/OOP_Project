@@ -17,7 +17,7 @@ private:
     bool isDead;
     float jumpVelocity;
 
-    const float gravity = 0.2f;
+    const float gravity = 0.15f;
     const float jumpStrength = -10.0f;
 
     sf::Texture idleTexture;
@@ -69,6 +69,7 @@ public:
     void activateShield();
     void deactivateShield();
     bool isShieldActive() const;
+    // void throwFireball();
 };
 
 class FireBall
