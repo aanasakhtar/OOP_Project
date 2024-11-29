@@ -12,6 +12,7 @@ private:
     double velocity;
     bool healingPotion;
     bool shieldStatus;
+    int currentShieldPower;
     bool isJumping;
     bool isDead;
     float jumpVelocity;
@@ -60,6 +61,7 @@ public:
     void reduceHealth(int damage);
     bool isPlayerDead();
     bool checkCollision(Enemy &enemy);
+
     // bool checkCollision(const collectables&);
     // bool checkCollision(const collectables&);
 
@@ -165,120 +167,80 @@ public:
     void renderEnemy(sf::RenderWindow &window);
 };
 
-// class Spider : public Enemy
-// {
-// private:
-//     int countTillDeath;
-//     std::vector<sf::Texture> runningTextures;
-//     sf::Texture spiderTexture;
-//     sf::Sprite spiderSprite;
+// collectibles
+class Collectible
+{
+protected:
+    sf::Sprite sprite;   // Sprite that will hold the texture
+    sf::Texture texture; // Texture to load and assign to the sprite
+    bool collected = false;
+    float velocity;
 
-//     sf::Clock animationClock;
-//     int runningFrame = 0;
-//     float frameDuration = 0.1f;
+public:
+    Collectible(float velocity = 0.f);
+    virtual ~Collectible() {}
 
-// public:
-//     Spider() = default;
-//     Spider(int damage, int count);
-//     bool loadSpiderAssets();
-//     void updateEnemy(float platformHeight, float windowHeight, bool isGameRunning);
-//     sf::Sprite getSpiderSprite() const;
-//     void setSpiderPosition(float playerX, float playerY);
-//     sf::FloatRect getSpiderDimensions();
-//     void updateCTD();
-//     // AcidBall throw_Acidball();
-// };
+    virtual bool loadTexture(const std::string &texturePath); // Load texture
+    virtual void update(float backgroundVelocity);            // Update collectible position
+    virtual void interactWithPlayer(Player &player);          // Handle interaction with player
 
-// class Bats : public Enemy
-// {
-// private:
-//     std::string name;
+    bool isCollected() const;
+    void setPosition(float x, float y);    // Set position of the sprite
+    sf::FloatRect getGlobalBounds() const; // Get global bounds for collision detection
+    void draw(sf::RenderWindow &window);   // Render the collectible sprite
+};
 
-// public:
-//     Bats();
-//     Bats(int damage);
-// };
+class HealingPotion : public Collectible
+{
+private:
+    int healingAmount;
 
-// class CollectableItems
-// {
-// private:
-//     int xpos;
-//     int ypos;
-//     bool collected;
+public:
+    HealingPotion(int healingAmount, float velocity = 0.f);
+    void interactWithPlayer(Player &player) override;
+};
 
-// public:
-//     CollectableItems();
-//     CollectableItems(int x, int y); // Constructor to initialize position and collected status
-//     virtual void collect();         // Marks item as collected
-//     bool is_collected() const;      // Checks if the item has been collected
-// };
+class Shield : public Collectible
+{
+private:
+    int protectionAmount; // Amount of protection the shield provides
 
-// class HealingPotion : public CollectableItems
-// {
-// private:
-//     int healing_amount;
+public:
+    Shield(int protectionAmount, float velocity = 0.f);
+    void interactWithPlayer(Player &player) override; // Interaction with the player
+};
 
-// public:
-//     HealingPotion();
-//     HealingPotion(int x, int y, int heal_amount); // Constructor to initialize position and healing amount
-//     void use();                                   // Uses the healing potion, applying its effects
-//     int get_healing_amount() const;               // Returns the healing amount
-// };
+class Obstacle
+{
+protected:
+    sf::Sprite sprite;   // Sprite for obstacle
+    sf::Texture texture; // Texture for obstacle
+    float velocity;
+    int damage;
 
-// class Bullets : public CollectableItems
-// {
-// private:
-//     int bullet_count;
+public:
+    Obstacle(float velocity = 0.f, int damage = 10);
+    virtual ~Obstacle() {}
 
-// public:
-//     Bullets();
-//     Bullets(int x, int y, int count, int bullet); // Constructor to initialize position and fireball count
+    virtual bool loadTexture(const std::string &texturePath); // Load texture
+    virtual void update(float backgroundVelocity);            // Update obstacle position
+    virtual void inflictDamage(Player &player);               // Damage the player on collision
 
-//     int get_bullet_count() const; // Returns the fireball count
-// };
+    void setPosition(float x, float y);    // Set position of the sprite
+    sf::FloatRect getGlobalBounds() const; // Get global bounds for collision detection
+    void draw(sf::RenderWindow &window);   // Render the obstacle sprite
+};
 
-// class Health : public CollectableItems
-// {
-// private:
-//     int health_amount;
+class Spikes : public Obstacle
+{
+public:
+    Spikes(float velocity = 0.f, int damage = 10);
+    void inflictDamage(Player &player) override; // Damages player on collision
+};
 
-// public:
-//     Health();
-//     Health(int amount);
-//     int get_amount();
-// };
-
-// class Shield : public CollectableItems
-// {
-// private:
-// public:
-// };
-
-// class Obstacle
-// {
-// private:
-//     int xpos;
-//     int ypos;
-
-// public:
-//     Obstacle(int x, int y);
-//     virtual void move_left();                    // Moves obstacle leftward
-//     virtual void inflict_damage(Player &player); // Inflicts damage on collision
-//     virtual int get_damage() = 0;
-// };
-
-// class Spikes : public Obstacle
-// {
-// public:
-//     Spikes(int x, int y);
-//     void inflict_damage(Player &player) override; // Damages player on contact
-//     int get_damage();
-// };
-
-// class AcidBath : public Obstacle
-// {
-// public:
-//     AcidBath(int x, int y);
-//     void inflict_damage(Player &player) override; // Poisons player on contact
-//     int get_damage();
-// };
+class AcidBath : public Obstacle
+{
+public:
+    AcidBath(float velocity = 0.f, int damage = 10);
+    void inflictDamage(Player &player) override; // Damages player over time
+};

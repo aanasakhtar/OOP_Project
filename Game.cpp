@@ -171,6 +171,10 @@ void Game::handleEvents()
         {
             player.jump();
         }
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
+        {
+            player.jump();
+        }
     }
 }
 

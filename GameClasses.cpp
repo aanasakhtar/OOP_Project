@@ -140,6 +140,31 @@ void Player::reduceHealth(int damage)
     }
 }
 
+// qasim's reduce health function
+void Player::reduceHealth(int damage)
+{
+    if (shieldStatus && currentShieldPower > 0)
+    {
+        // Shield absorbs damage first
+        if (damage <= currentShieldPower)
+        {
+            currentShieldPower -= damage; // Shield absorbs the full damage
+            damage = 0;                   // No damage left for health
+        }
+        else
+        {
+            damage -= currentShieldPower; // If shield can't absorb all, reduce health
+            currentShieldPower = 0;       // Shield is now depleted
+            deactivateShield();           // Shield is turned off after depletion
+        }
+    }
+
+    // Apply remaining damage to health
+    health -= damage;
+    if (health < 0)
+        health = 0; // Make sure health doesn't go negative
+}
+
 void Player::drawHealthBar(sf::RenderWindow &window, bool isGameRunning) const
 {
     if (isGameRunning)
@@ -178,6 +203,7 @@ void Player::reset()
 void Player::activateShield()
 {
     shieldStatus = true;
+    currentShieldPower = 100;
 }
 
 void Player::deactivateShield()
@@ -260,6 +286,7 @@ bool Enemy::loadEnemyAssets(const std::vector<std::string> &movingTexturePaths)
 
 void Enemy::renderEnemy(sf::RenderWindow &window)
 {
+    std::cout << sprite.getPosition().x << " " << sprite.getPosition().y << std::endl;
     window.draw(sprite);
 }
 
@@ -396,27 +423,171 @@ void Spider::renderEnemy(sf::RenderWindow &window)
     window.draw(sprite); // Render the Spider's sprite
 }
 
-// // CollectableItem
-// CollectableItems::CollectableItems() {}
-// CollectableItems::CollectableItems(int x, int y) : xpos(x), ypos(y), collected(false) {}
+Collectible::Collectible(float velocity) : velocity(velocity) {}
 
-// // HealingPotion
-// HealingPotion::HealingPotion() : healing_amount(0) {}
-// HealingPotion::HealingPotion(int x, int y, int heal_amount) : CollectableItems(x, y), healing_amount(heal_amount) {}
+bool Collectible::loadTexture(const std::string &texturePath)
+{
+    if (!texture.loadFromFile(texturePath)) // Load texture into the texture member
+    {
+        std::cerr << "Error: Could not load texture: " << texturePath << std::endl;
+        return false;
+    }
+    sprite.setTexture(texture); // Set the texture to the sprite after loading it
+    return true;
+}
 
-// // Bullets
-// Bullets::Bullets() : bullet_count(0) {}
-// Bullets::Bullets(int x, int y, int count, int bullet) : CollectableItems(x, y), bullet_count(bullet) {}
-// int Bullets::get_bullet_count() const
-// {
-//     return bullet_count;
-// }
-// // Health
-// Health::Health() : health_amount(0) {}
-// Health::Health(int d) : health_amount(d) {}
-// int Health::get_amount()
-// {
-//     return health_amount;
-// }
+void Collectible::update(float backgroundVelocity)
+{
+    sprite.move(-backgroundVelocity, 0); // Move left with the background velocity
+}
 
-// // Obstacle
+void Collectible::interactWithPlayer(Player &player)
+{
+    if (sprite.getGlobalBounds().intersects(player.getPlayerSprite().getGlobalBounds()))
+    {
+        if (!collected)
+        {
+            collected = true;
+            std::cout << "Collectible acquired!" << std::endl;
+        }
+    }
+}
+
+bool Collectible::isCollected() const
+{
+    return collected;
+}
+
+void Collectible::setPosition(float x, float y)
+{
+    sprite.setPosition(x, y);
+}
+
+sf::FloatRect Collectible::getGlobalBounds() const
+{
+    return sprite.getGlobalBounds();
+}
+
+void Collectible::draw(sf::RenderWindow &window)
+{
+    if (!collected)
+    {
+        window.draw(sprite); // Draw sprite if not collected
+    }
+}
+
+HealingPotion::HealingPotion(int healingAmount, float velocity)
+    : Collectible(velocity), healingAmount(healingAmount)
+{
+    if (!loadTexture("Items/000_0065_heart.png")) // Load texture (path may need adjusting)
+    {
+        std::cerr << "Error: Could not load healing potion texture." << std::endl;
+    }
+}
+
+void HealingPotion::interactWithPlayer(Player &player)
+{
+    if (!isCollected())
+    {
+        Collectible::interactWithPlayer(player); // Check for collision with player
+        if (isCollected())
+        {
+            player.reduceHealth(-healingAmount); // Heal the player
+            std::cout << "Player healed by " << healingAmount << std::endl;
+        }
+    }
+}
+
+Shield::Shield(int protectionAmount, float velocity)
+    : Collectible(velocity), protectionAmount(protectionAmount)
+{
+    if (!loadTexture("3.png")) // Load the shield texture (path may need adjusting)
+    {
+        std::cerr << "Error: Could not load shield texture." << std::endl;
+    }
+}
+
+void Shield::interactWithPlayer(Player &player)
+{
+    if (!isCollected())
+    {
+        Collectible::interactWithPlayer(player); // Check for collision with player
+        if (isCollected())
+        {
+            player.activateShield(); // Activate shield for player
+            std::cout << "Shield activated! Protection: " << std::endl;
+        }
+    }
+}
+
+Obstacle::Obstacle(float velocity, int damage)
+    : velocity(velocity), damage(damage) {}
+
+bool Obstacle::loadTexture(const std::string &texturePath)
+{
+    if (!texture.loadFromFile(texturePath)) // Load texture into the texture member
+    {
+        std::cerr << "Error: Could not load texture: " << texturePath << std::endl;
+        return false;
+    }
+    sprite.setTexture(texture); // Set the texture to the sprite
+    return true;
+}
+
+void Obstacle::update(float backgroundVelocity)
+{
+    sprite.move(-backgroundVelocity, 0); // Move left with the background velocity
+}
+
+void Obstacle::inflictDamage(Player &player)
+{
+    // Default behavior: obstacles inflict damage when the player hits them
+    std::cout << "Obstacle inflicts " << damage << " damage!" << std::endl;
+}
+
+void Obstacle::setPosition(float x, float y)
+{
+    sprite.setPosition(x, y);
+}
+
+sf::FloatRect Obstacle::getGlobalBounds() const
+{
+    return sprite.getGlobalBounds();
+}
+
+void Obstacle::draw(sf::RenderWindow &window)
+{
+    window.draw(sprite); // Draw sprite on screen
+}
+
+Spikes::Spikes(float velocity, int damage)
+    : Obstacle(velocity, damage)
+{
+    if (!loadTexture("spikes.png")) // Load spikes texture (path may need adjusting)
+    {
+        std::cerr << "Error: Could not load spikes texture." << std::endl;
+    }
+}
+
+void Spikes::inflictDamage(Player &player)
+{
+    // Spikes inflict damage instantly
+    player.reduceHealth(damage);
+    std::cout << "Player hit by spikes! " << damage << " damage taken!" << std::endl;
+}
+
+AcidBath::AcidBath(float velocity, int damage)
+    : Obstacle(velocity, damage)
+{
+    if (!loadTexture("acid_bath.png")) // Load acid bath texture (path may need adjusting)
+    {
+        std::cerr << "Error: Could not load acid bath texture." << std::endl;
+    }
+}
+
+void AcidBath::inflictDamage(Player &player)
+{
+    // Acid bath inflicts damage over time
+    player.reduceHealth(damage);
+    std::cout << "Player touched the acid bath! " << damage << " damage taken!" << std::endl;
+}
