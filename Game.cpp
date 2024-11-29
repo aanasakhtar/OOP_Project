@@ -136,6 +136,17 @@ void Game::loadAssets()
     {
         std::cout << "Enemies vector has " << enemies.size() << " enemies." << std::endl;
     }
+
+    // load collectibles
+
+    HealingPotion heart;
+    heart.loadTexture("Items\\000_0065_heart.png");
+    heart.setPosition(window.getSize().x + heart.getGlobalBounds().width, player.getPlayerDimensions().top + 100);
+    collectibles.push_back(std::move(heart));
+    Shield shield;
+    shield.loadTexture("Items\\3.png");
+    shield.setPosition(window.getSize().x + heart.getGlobalBounds().width - 50, player.getPlayerDimensions().top + 100);
+    collectibles.push_back(std::move(heart));
 }
 
 void Game::run()
@@ -217,6 +228,17 @@ void Game::updateGame()
                        [](const std::unique_ptr<Enemy> &enemy)
                        { return enemy->shouldDelete(); }),
         enemies.end());
+
+    // for (auto &collectible : collectibles)
+    // {
+    //     collectible.updateCollectible();
+
+    //     if (player.checkCollision(collectible))
+    //     {
+    //         player.reduceHealth(collectible.getDamage());
+    //         collectible.markForDeletion();
+    //     }
+    // }
 
     if (player.isPlayerDead())
     {
@@ -302,6 +324,10 @@ void Game::renderGame()
         {
             enemy->renderEnemy(window);
         }
+        // for (auto &collectible : collectibles)
+        // {
+        // collectible->renderCollectible(window);
+        // }
     }
 
     // Draw player and health bar if the game is running

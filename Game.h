@@ -41,6 +41,9 @@ private:
     // Enemy
     std::vector<std::unique_ptr<Enemy>> enemies;
 
+    // Collectables
+    std::vector<Collectible> collectibles;
+
     // Score and Game State
     int scoreCounter;
     sf::Clock scoreClock;

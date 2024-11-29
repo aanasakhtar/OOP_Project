@@ -292,7 +292,6 @@ bool Enemy::loadEnemyAssets(const std::vector<std::string> &movingTexturePaths)
 
 void Enemy::renderEnemy(sf::RenderWindow &window)
 {
-    std::cout << sprite.getPosition().x << " " << sprite.getPosition().y << std::endl;
     window.draw(sprite);
 }
 
@@ -474,7 +473,12 @@ sf::FloatRect Collectible::getGlobalBounds() const
     return sprite.getGlobalBounds();
 }
 
-void Collectible::draw(sf::RenderWindow &window)
+void Collectible::updateCollectible()
+{
+    sprite.setPosition(sprite.getPosition().x - velocity, sprite.getPosition().y);
+}
+
+void Collectible::renderCollectible(sf::RenderWindow &window)
 {
     if (!collected)
     {

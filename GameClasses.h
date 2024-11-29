@@ -186,9 +186,10 @@ public:
     virtual void interactWithPlayer(Player &player);          // Handle interaction with player
 
     bool isCollected() const;
-    void setPosition(float x, float y);    // Set position of the sprite
-    sf::FloatRect getGlobalBounds() const; // Get global bounds for collision detection
-    void draw(sf::RenderWindow &window);   // Render the collectible sprite
+    virtual void setPosition(float x, float y); // Set position of the sprite
+    sf::FloatRect getGlobalBounds() const;      // Get global bounds for collision detection
+    virtual void updateCollectible();
+    void renderCollectible(sf::RenderWindow &window); // Render the collectible sprite
 };
 
 class HealingPotion : public Collectible
@@ -197,7 +198,7 @@ private:
     int healingAmount;
 
 public:
-    HealingPotion(int healingAmount, float velocity = 0.f);
+    HealingPotion(int healingAmount = 10, float velocity = 0.f);
     void interactWithPlayer(Player &player) override;
 };
 
@@ -207,6 +208,7 @@ private:
     int protectionAmount; // Amount of protection the shield provides
 
 public:
+    Shield() = default;
     Shield(int protectionAmount, float velocity = 0.f);
     void interactWithPlayer(Player &player) override; // Interaction with the player
 };
