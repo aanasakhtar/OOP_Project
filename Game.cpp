@@ -8,9 +8,9 @@ Game::Game()
       backgroundVelocity(0.5f),
       platformOffset(0.0f),
       platformVelocity(1.5f),
-      scoreCounter(0),
-      gameStart(false)
+      scoreCounter(0)
 {
+    gameState = GameState::Intro;
     loadAssets();
 }
 
@@ -133,10 +133,7 @@ void Game::run()
 
         handleEvents();
 
-        if (gameStart)
-        {
-            updateGame();
-        }
+        updateGame();
 
         renderGame();
     }
@@ -156,7 +153,18 @@ void Game::handleEvents()
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
         {
-            gameStart = !gameStart;
+            if (gameState == GameState::Intro || gameState == GameState::GameOver)
+            {
+                // Reset the game and start running
+                resetGame();
+                gameState = GameState::Running;
+                player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f);
+            }
+            else if (gameState == GameState::Running)
+            {
+                // Pause the game
+                gameState = GameState::Intro;
+            }
         }
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up)
@@ -168,22 +176,40 @@ void Game::handleEvents()
 
 void Game::updateGame()
 {
+    if (gameState != GameState::Running)
+        return;
+
     updateBackground();
     updatePlatform();
     updateScore();
     updateFireBallCount();
-    player.updatePlayer(platformSprite.getGlobalBounds().height, window.getSize().y, gameStart);
+    player.updatePlayer(platformSprite.getGlobalBounds().height, window.getSize().y, true);
+
+    // Update enemies and check for collisions
     for (auto &enemy : enemies)
     {
-        enemy->updateEnemy(backgroundVelocity, gameStart);
+        enemy->updateEnemy(backgroundVelocity, true);
+
+        if (player.checkCollision(*enemy))
+        {
+            player.reduceHealth(enemy->getDamage());
+            enemy->markForDeletion();
+        }
     }
 
-    // Remove enemies that are off-screen or marked for deletion
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(),
                        [](const std::unique_ptr<Enemy> &enemy)
                        { return enemy->shouldDelete(); }),
         enemies.end());
+
+    if (player.isPlayerDead())
+    {
+        gameState = GameState::GameOver;
+        introText.setString("Game Over!\nScore: " + std::to_string(scoreCounter) + "\nPress Space to Restart");
+        introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
+                              (window.getSize().y - introText.getLocalBounds().height) / 2);
+    }
 }
 
 void Game::updateBackground()
@@ -222,9 +248,26 @@ void Game::updateFireBallCount()
     fireBallCount.setString(std::to_string(player.getFireBallCount()) + "x");
 }
 
+void Game::resetGame()
+{
+    // Reset player
+    player.reset(); // Add a `reset()` method in the Player class
+
+    // Reset score
+    scoreCounter = 0;
+
+    // Clear enemies
+    enemies.clear();
+
+    // Reset intro text
+    introText.setString("Press Space to Start");
+    introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
+                          (window.getSize().y - introText.getLocalBounds().height) / 2);
+}
+
 void Game::renderGame()
 {
-    window.clear(); // Clear the screen
+    window.clear();
 
     // Draw background
     window.draw(bgSprite1);
@@ -237,18 +280,32 @@ void Game::renderGame()
         window.draw(platformSprite);
     }
 
-    // Draw enemies
-    for (const auto &enemy : enemies)
+    // Draw enemies if the game is running
+    if (gameState == GameState::Running)
     {
-        enemy->renderEnemy(window);
+        for (const auto &enemy : enemies)
+        {
+            enemy->renderEnemy(window);
+        }
     }
 
-    // Draw player
-    window.draw(player.getPlayerSprite());
+    // Draw player and health bar if the game is running
+    if (gameState == GameState::Running)
+    {
+        player.drawHealthBar(window, true);
+        window.draw(fireBallCount);
+        fireBall.drawFireBall(window, true);
+    }
 
-    // Draw score and UI elements
+    window.draw(player.getPlayerSprite());
+    // Draw intro text and score when the game is paused or over
+    if (gameState == GameState::Intro || gameState == GameState::GameOver)
+    {
+        window.draw(introText);
+    }
+
+    // Draw score
     window.draw(scoreText);
-    window.draw(fireBallCount);
-    fireBall.drawFireBall(window, gameStart);
-    window.display(); // Display everything on the screen
+
+    window.display();
 }

@@ -44,7 +44,13 @@ private:
     // Score and Game State
     int scoreCounter;
     sf::Clock scoreClock;
-    bool gameStart;
+    enum class GameState
+    {
+        Intro,
+        Running,
+        GameOver
+    };
+    GameState gameState;
 
     // Private Methods
     void loadAssets();
@@ -55,6 +61,7 @@ private:
     void updateBackground();
     void updateScore();
     void updateFireBallCount();
+    void resetGame();
 
 public:
     Game();     // Constructor

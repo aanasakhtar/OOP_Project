@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 // Nabeeha starts here
-
+class Enemy;
 class Player
 {
 private:
@@ -13,6 +13,7 @@ private:
     bool healingPotion;
     bool shieldStatus;
     bool isJumping;
+    bool isDead;
     float jumpVelocity;
 
     const float gravity = 0.2f;
@@ -52,10 +53,17 @@ public:
 
     sf::RectangleShape getHealthBar();
 
+    void drawHealthBar(sf::RenderWindow &window, bool isGameRunning) const;
+
     int getFireBallCount();
 
-    // Other functionality (placeholders for future work)
     void reduceHealth(int damage);
+    bool isPlayerDead();
+    bool checkCollision(Enemy &enemy);
+    // bool checkCollision(const collectables&);
+    // bool checkCollision(const collectables&);
+
+    void reset();
     void activateShield();
     void deactivateShield();
     bool isShieldActive() const;
@@ -107,6 +115,8 @@ public:
 
     void setPosition(float x, float y);
     sf::FloatRect getGlobalBounds() const;
+    int getDamage() const;
+    sf::Sprite getSprite() const;
     void reduceHealth(int damage);
     bool deathStatus() const;
 };

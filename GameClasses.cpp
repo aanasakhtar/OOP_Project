@@ -6,7 +6,11 @@
 
 Player::Player()
     : health(100), fireballsCount(0), healingPotion(false), velocity(0.0),
-      shieldStatus(false), isJumping(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 50.f)) {}
+      shieldStatus(false), isJumping(false), isDead(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 50.f))
+{
+    healthBar.setFillColor(sf::Color(119, 105, 78));
+    healthBar.setPosition(700, 100);
+}
 
 bool Player::loadPlayerAssets()
 {
@@ -64,7 +68,6 @@ void Player::updatePlayer(float platformHeight, float windowHeight, bool isGameR
             isJumping = false;
             jumpVelocity = 0.0f;
         }
-
         playerSprite.setPosition(playerSprite.getPosition().x, newY);
     }
 
@@ -104,11 +107,55 @@ sf::FloatRect Player::getPlayerDimensions()
     return playerSprite.getGlobalBounds();
 }
 
+// Healthbar
+
 sf::RectangleShape Player::getHealthBar()
 {
-    healthBar.setFillColor(sf::Color(119, 105, 78));
-    healthBar.setPosition(700, 100);
     return healthBar;
+}
+
+void Player::reduceHealth(int damage)
+{
+    health -= damage;
+    if (damage == 5)
+    {
+        healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 25, healthBar.getSize().y));
+    }
+    else if (damage == 10)
+    {
+        healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 50, healthBar.getSize().y));
+    }
+    else if (damage == 20)
+    {
+        healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 100, healthBar.getSize().y));
+    }
+    else if (damage == 30)
+    {
+        healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 150, healthBar.getSize().y));
+    }
+    if (health < 0)
+    {
+        health = 0;
+        isDead = true;
+    }
+}
+
+void Player::drawHealthBar(sf::RenderWindow &window, bool isGameRunning) const
+{
+    if (isGameRunning)
+    {
+        window.draw(healthBar);
+    }
+}
+
+bool Player::isPlayerDead()
+{
+    return isDead;
+}
+
+bool Player::checkCollision(Enemy &enemy)
+{
+    return playerSprite.getGlobalBounds().intersects(enemy.getSprite().getGlobalBounds());
 }
 
 int Player::getFireBallCount()
@@ -116,13 +163,17 @@ int Player::getFireBallCount()
     return fireballsCount;
 }
 
-// Placeholder methods for future functionality
-void Player::reduceHealth(int damage)
+void Player::reset()
 {
-    health -= damage;
-    if (health < 0)
-        health = 0;
+    health = 100; // Reset health
+    isDead = false;
+
+    healthBar.setSize(sf::Vector2f(500.f, 50.f)); // Reset health bar size
+    playerSprite.setPosition(50.0f, 500.0f);      // Reset player position
+    playerSprite.setTexture(idleTexture);
 }
+
+// Placeholder methods for future functionality
 
 void Player::activateShield()
 {
@@ -222,6 +273,11 @@ sf::FloatRect Enemy::getGlobalBounds() const
     return sprite.getGlobalBounds();
 }
 
+sf::Sprite Enemy::getSprite() const
+{
+    return sprite;
+}
+
 void Enemy::reduceHealth(int damage)
 {
     health -= damage;
@@ -232,6 +288,11 @@ void Enemy::reduceHealth(int damage)
 bool Enemy::deathStatus() const
 {
     return isDead;
+}
+
+int Enemy::getDamage() const
+{
+    return damage;
 }
 
 //
