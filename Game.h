@@ -35,8 +35,12 @@ private:
     // Player
     Player player;
 
-    // Player's fireball count
-    FireBall fireBall;
+    // FireBalls
+    std::vector<FireBall> fireballs;
+
+        // Player's fireball count
+    sf::Texture fireBallTexture;
+    sf::Sprite fireBallSprite;
 
     // Enemy
     std::vector<std::unique_ptr<Enemy>> enemies;
@@ -64,6 +68,7 @@ private:
     void updateBackground();
     void updateScore();
     void updateFireBallCount();
+    void updateFireBalls();
     void resetGame();
 
 public:

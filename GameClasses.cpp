@@ -5,8 +5,8 @@
 // player
 
 Player::Player()
-    : health(100), fireballsCount(0), healingPotion(false), velocity(0.0),
-      shieldStatus(false), isJumping(false), isDead(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 50.f))
+    : health(100), fireballsCount(5), healingPotion(false), velocity(0.0),
+      shieldStatus(false), isJumping(false), isDead(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 50.f)), fireBallThrown(false)
 {
     healthBar.setFillColor(sf::Color(119, 105, 78));
     healthBar.setPosition(700, 100);
@@ -180,7 +180,17 @@ bool Player::isPlayerDead()
 
 bool Player::checkCollision(Enemy &enemy)
 {
-    return playerSprite.getGlobalBounds().intersects(enemy.getSprite().getGlobalBounds());
+    // Define the offset for the player sprite (adjust this based on your offset values)
+    sf::Vector2f offset(playerSprite.getGlobalBounds().width / 2 - 25, playerSprite.getGlobalBounds().height / 2 + 25); // Modify these values as needed
+
+    // Create a copy of the player sprite
+    sf::Sprite adjustedPlayerSprite = playerSprite;
+
+    // Adjust the player's sprite position by the offset
+    adjustedPlayerSprite.setPosition(playerSprite.getPosition() + offset);
+
+    // Perform the collision check with the adjusted player sprite
+    return adjustedPlayerSprite.getGlobalBounds().intersects(enemy.getSprite().getGlobalBounds());
 }
 
 int Player::getFireBallCount()
@@ -215,15 +225,33 @@ bool Player::isShieldActive() const
 {
     return shieldStatus;
 }
-// void Player::throwFireball(){
-//     if (this->fireballsCount>0){
-//         FireBall ball;
-//         ball.setFireBallPosition(playerSprite.getGlobalBounds().top().x,playerSprite.getGlobalBounds().top().y)
-//     }
-// }
+void Player::throwFireball()
+{
+    if (this->fireballsCount != 0)
+    {
+        FireBall ball;
+        ball.setFireBallPosition(playerSprite.getPosition().x, playerSprite.getPosition().y);
+        updateFireBallThrown();
+    }
+}
+
+void Player::updateFireBallThrown()
+{
+    fireBallThrown = true;
+}
+
+bool Player::getFireBallStatus()
+{
+    return fireBallThrown;
+}
 
 // Display
 FireBall::FireBall() : position(0, 0) {}
+
+FireBall::FireBall(sf::Vector2f position)
+{
+    sprite.setPosition(position);
+}
 
 bool FireBall::loadFireBallTexture()
 {
@@ -258,6 +286,24 @@ void FireBall::setFireBallScale(float scaleX, float scaleY)
     sprite.setScale(scaleX, scaleY);
 }
 
+void FireBall::updateFireBallOnScreen(float velocity, bool thrown)
+{
+    if (thrown)
+    {
+        sprite.setPosition(sprite.getPosition().x + velocity, sprite.getPosition().y);
+    }
+}
+
+void FireBall::renderFireBallForPlayer(sf::RenderWindow &window, bool thrown)
+{
+    if (thrown)
+        window.draw(sprite);
+}
+
+sf::Sprite FireBall::getSprite()
+{
+    return sprite;
+}
 // enemy class functions
 Enemy::Enemy(int damage, int health, float velocity)
     : damage(damage), health(health), velocity(velocity), isDead(false) {}

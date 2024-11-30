@@ -29,6 +29,7 @@ private:
     float frameDuration = 0.1f;
 
     sf::RectangleShape healthBar;
+    bool fireBallThrown;
 
 public:
     Player();
@@ -62,6 +63,8 @@ public:
     bool isPlayerDead();
     bool checkCollision(Enemy &enemy);
 
+    void updateFireBallThrown();
+    bool getFireBallStatus();
     // bool checkCollision(const collectables&);
     // bool checkCollision(const collectables&);
 
@@ -69,7 +72,8 @@ public:
     void activateShield();
     void deactivateShield();
     bool isShieldActive() const;
-    // void throwFireball();
+    void throwFireball();
+    bool getFireBall();
 };
 
 class FireBall
@@ -81,6 +85,8 @@ private:
 
 public:
     FireBall();
+    FireBall(sf::Vector2f);
+    sf::Sprite getSprite();
     bool loadFireBallTexture();
     bool loadFireBallFont();
     void setFireBallPosition(float x, float y);
@@ -88,6 +94,8 @@ public:
     sf::Vector2u getFireBallDimensions() const;
     void updateCount(unsigned int newCount);
     void setFireBallScale(float scaleX, float scaleY);
+    void renderFireBallForPlayer(sf::RenderWindow &window, bool thrown);
+    void updateFireBallOnScreen(float velocity, bool thrown);
 };
 
 class Enemy

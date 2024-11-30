@@ -61,6 +61,15 @@ void Game::loadAssets()
     fireBallCount.setCharacterSize(35);
     fireBallCount.setFillColor(sf::Color(255, 255, 255, 100));
     fireBallCount.setPosition(window.getSize().x - 250, 105);
+    if (!fireBallTexture.loadFromFile("fireball\\file.png"))
+    {
+        std::cerr << "Error: Could not load fireball texture" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    fireBallSprite.setTexture(fireBallTexture);
+    fireBallSprite.setPosition(fireBallCount.getPosition().x + fireBallCount.getGlobalBounds().width + 35, 70);
+    fireBallSprite.setScale(0.125, 0.125);
+    std::cout << fireBallSprite.getPosition().x << " / " << fireBallSprite.getPosition().y << std::endl;
 
     // Load Platform
     if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
@@ -83,16 +92,9 @@ void Game::loadAssets()
         exit(EXIT_FAILURE);
     }
     player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f);
+    std::cout << window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f << std::endl;
 
     // Player's fireball count
-
-    if (!fireBall.loadFireBallTexture())
-    {
-        std::cerr << "Error: Could not load fireball texture!" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    fireBall.setFireBallPosition(2100 - fireBall.getFireBallDimensions().x / 2, 75);
-    fireBall.setFireBallScale(0.125, 0.125);
 
     // Enemies
     // Bat
@@ -196,6 +198,15 @@ void Game::handleEvents()
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up)
         {
             player.jump();
+        }
+
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
+        {
+            FireBall fireball(player.getPlayerSprite().getPosition());
+            fireball.setFireBallScale(0.125, 0.125);
+
+            // Add the new fireball to the fireballs vector
+            fireballs.push_back(fireball);
         }
     }
 }
@@ -335,7 +346,7 @@ void Game::renderGame()
     {
         player.drawHealthBar(window, true);
         window.draw(fireBallCount);
-        fireBall.drawFireBall(window, true);
+        window.draw(fireBallSprite);
     }
 
     window.draw(player.getPlayerSprite());
@@ -347,6 +358,6 @@ void Game::renderGame()
 
     // Draw score
     window.draw(scoreText);
-
+    // Thrown fireball
     window.display();
 }
