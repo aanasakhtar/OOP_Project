@@ -1,11 +1,12 @@
+
 #include "Game.h"
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
 Game::Game()
-    : window(sf::VideoMode(1800, 960), "SFML Game"),
+    : window(sf::VideoMode(1500, 660), "SFML Game"),
       backgroundOffset(0.0f),
-      backgroundVelocity(0.5f),
+      backgroundVelocity(0.05f),
       platformOffset(0.0f),
       platformVelocity(1.5f),
       scoreCounter(0)
@@ -69,7 +70,6 @@ void Game::loadAssets()
     fireBallSprite.setTexture(fireBallTexture);
     fireBallSprite.setPosition(fireBallCount.getPosition().x + fireBallCount.getGlobalBounds().width + 35, 70);
     fireBallSprite.setScale(0.125, 0.125);
-    std::cout << fireBallSprite.getPosition().x << " / " << fireBallSprite.getPosition().y << std::endl;
 
     // Load Platform
     if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
@@ -92,73 +92,70 @@ void Game::loadAssets()
         exit(EXIT_FAILURE);
     }
     player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f);
-    std::cout << window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f << std::endl;
 
     // Player's fireball count
+}
 
-    // Enemies
-    // Bat
-    auto bat = std::make_unique<Bat>(10, 3, backgroundVelocity, 5); // Damage, health, velocity, countTillDeath
-    std::vector<std::string> batPaths = {
-        "Fly\\0_Monster_Fly_000.png",
-        "Fly\\0_Monster_Fly_004.png",
-        "Fly\\0_Monster_Fly_008.png",
-        "Fly\\0_Monster_Fly_012.png"};
-    if (!bat->loadEnemyAssets(batPaths))
-    {
-        std::cerr << "Error: Could not load bats assets" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    bat->setPosition(window.getSize().x + bat->getGlobalBounds().width, player.getPlayerDimensions().top + 10.f);
-    enemies.push_back(std::move(bat));
-    std::cout << "Bat added to enemies vector. Current size: " << enemies.size() << std::endl;
+void Game::spawnRandomEnemy()
+{
+    // Randomly choose between Bat and Spider
+    int randomEnemyType = rand() % 2; // 0 for Bat, 1 for Spider
 
-    // Create and add a Spider
-    auto spider = std::make_unique<Spider>(15, 5, backgroundVelocity, 3); // Damage, health, velocity, countTillDeath
-    std::vector<std::string> spiderPaths = {
-        "Walking\\0_Monster_Walking_000.png",
-        "Walking\\0_Monster_Walking_004.png",
-        "Walking\\0_Monster_Walking_008.png",
-        "Walking\\0_Monster_Walking_012.png"};
-    if (!spider->loadEnemyAssets(spiderPaths))
+    std::unique_ptr<Enemy> newEnemy;
+    if (randomEnemyType == 0)
     {
-        std::cerr << "Error: Could not load spider assets" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    spider->setPosition(window.getSize().x + spider->getGlobalBounds().width, player.getPlayerDimensions().top + 100);
-    enemies.push_back(std::move(spider));
-    std::cout << "Spider added to enemies vector. Current size: " << enemies.size() << std::endl;
+        // Create a Bat
+        newEnemy = std::make_unique<Bat>(10, 3, backgroundVelocity, 5);
+        std::vector<std::string> batPaths = {
+            "Fly\\0_Monster_Fly_000.png",
+            "Fly\\0_Monster_Fly_004.png",
+            "Fly\\0_Monster_Fly_008.png",
+            "Fly\\0_Monster_Fly_012.png"};
+        if (!newEnemy->loadEnemyAssets(batPaths))
+        {
+            std::cerr << "Error: Could not load bat assets" << std::endl;
+            exit(EXIT_FAILURE);
+        }
 
-    // Check if the enemies vector is empty
-    if (enemies.empty())
-    {
-        std::cerr << "Enemies vector is empty!" << std::endl;
+        // Bats spawn above the ground, but not too high
+        float randomX = window.getSize().x + newEnemy->getGlobalBounds().width;
+        // Adjust this value to control how high bats spawn above the platform
+        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height - 100;  // 100 pixels above platform
+        newEnemy->setPosition(randomX, randomY);
     }
     else
     {
-        std::cout << "Enemies vector has " << enemies.size() << " enemies." << std::endl;
+        // Create a Spider
+        newEnemy = std::make_unique<Spider>(15, 5, backgroundVelocity, 3);
+        std::vector<std::string> spiderPaths = {
+            "Walking\\0_Monster_Walking_000.png",
+            "Walking\\0_Monster_Walking_004.png",
+            "Walking\\0_Monster_Walking_008.png",
+            "Walking\\0_Monster_Walking_012.png"};
+        if (!newEnemy->loadEnemyAssets(spiderPaths))
+        {
+            std::cerr << "Error: Could not load spider assets" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        // Spiders spawn on the ground (just above the platform)
+        float randomX = window.getSize().x + newEnemy->getGlobalBounds().width;
+        // Ensure spiders spawn just above the platform (avoid them spawning inside the ground)
+        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height;
+        newEnemy->setPosition(randomX, randomY);
     }
 
-    // load collectibles
-
-    HealingPotion heart;
-    heart.loadTexture("Items\\000_0065_heart.png");
-    heart.setPosition(window.getSize().x + heart.getGlobalBounds().width, player.getPlayerDimensions().top + 100);
-    collectibles.push_back(std::move(heart));
-    Shield shield;
-    shield.loadTexture("Items\\3.png");
-    shield.setPosition(window.getSize().x + heart.getGlobalBounds().width - 50, player.getPlayerDimensions().top + 100);
-    collectibles.push_back(std::move(heart));
+    // Add the newly created enemy to the enemies vector
+    enemies.push_back(std::move(newEnemy));
 }
+
 
 void Game::run()
 {
     while (window.isOpen())
     {
         handleEvents();
-
         updateGame();
-
         renderGame();
     }
 }
@@ -177,21 +174,16 @@ void Game::handleEvents()
         {
             if (gameState == GameState::GameOver)
             {
-                // Reset the game but do not clear enemies
                 resetGame();
-                gameState = GameState::Running; // Transition to running state
-                std::cout << "Game started, GameState: Running" << std::endl;
+                gameState = GameState::Running;
             }
             else if (gameState == GameState::Running)
             {
-                // Pause the game (transition back to intro screen)
                 gameState = GameState::Intro;
-                std::cout << "Game paused, GameState: Intro" << std::endl;
             }
             else if (gameState == GameState::Intro)
             {
-                gameState = GameState::Running; // Transition to running state
-                std::cout << "Game started, GameState: Running" << std::endl;
+                gameState = GameState::Running;
             }
         }
 
@@ -204,8 +196,6 @@ void Game::handleEvents()
         {
             FireBall fireball(player.getPlayerSprite().getPosition());
             fireball.setFireBallScale(0.125, 0.125);
-
-            // Add the new fireball to the fireballs vector
             fireballs.push_back(fireball);
         }
     }
@@ -221,6 +211,13 @@ void Game::updateGame()
     updateScore();
     updateFireBallCount();
     player.updatePlayer(platformSprite.getGlobalBounds().height, window.getSize().y, true);
+
+    // Spawn enemies randomly
+    if (enemySpawnTimer.getElapsedTime().asSeconds() > 2.0f) // Spawn every 2 seconds
+    {
+        spawnRandomEnemy();
+        enemySpawnTimer.restart();  // Restart the timer after spawning an enemy
+    }
 
     // Update enemies and check for collisions
     for (auto &enemy : enemies)
@@ -240,17 +237,6 @@ void Game::updateGame()
                        { return enemy->shouldDelete(); }),
         enemies.end());
 
-    // for (auto &collectible : collectibles)
-    // {
-    //     collectible.updateCollectible();
-
-    //     if (player.checkCollision(collectible))
-    //     {
-    //         player.reduceHealth(collectible.getDamage());
-    //         collectible.markForDeletion();
-    //     }
-    // }
-
     if (player.isPlayerDead())
     {
         gameState = GameState::GameOver;
@@ -259,6 +245,7 @@ void Game::updateGame()
                               (window.getSize().y - introText.getLocalBounds().height) / 2);
     }
 }
+
 
 void Game::updateBackground()
 {

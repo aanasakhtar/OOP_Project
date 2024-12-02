@@ -16,14 +16,11 @@ bool Player::loadPlayerAssets()
 {
     std::cout << "Loading player assets..." << std::endl;
 
-    // Load idle texture
     if (!idleTexture.loadFromFile("Gangsters_1\\Idle.png"))
     {
         std::cerr << "Error: Could not load idle texture." << std::endl;
         return false;
     }
-
-    // Load running textures
 
     runningTextures.resize(4);
 
@@ -61,7 +58,6 @@ void Player::updatePlayer(float platformHeight, float windowHeight, bool isGameR
         float newY = playerSprite.getPosition().y + jumpVelocity;
         jumpVelocity += gravity;
 
-        // Check if landed on platform
         if (newY >= windowHeight - platformHeight - playerSprite.getGlobalBounds().height + 20.0f)
         {
             newY = windowHeight - platformHeight - playerSprite.getGlobalBounds().height + 20.0f;
@@ -73,7 +69,6 @@ void Player::updatePlayer(float platformHeight, float windowHeight, bool isGameR
 
     if (isGameRunning)
     {
-        // Handle running animation
         if (animationClock.getElapsedTime().asSeconds() > frameDuration)
         {
             runningFrame = (runningFrame + 1) % runningTextures.size();
@@ -83,7 +78,6 @@ void Player::updatePlayer(float platformHeight, float windowHeight, bool isGameR
     }
     else
     {
-        // Show idle texture when game isn't running
         playerSprite.setTexture(idleTexture);
     }
 }
@@ -107,62 +101,34 @@ sf::FloatRect Player::getPlayerDimensions()
     return playerSprite.getGlobalBounds();
 }
 
-// Healthbar
-
 sf::RectangleShape Player::getHealthBar()
 {
     return healthBar;
 }
 
-// void Player::reduceHealth(int damage)
-// {
-//     health -= damage;
-//     if (damage == 5)
-//     {
-//         healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 25, healthBar.getSize().y));
-//     }
-//     else if (damage == 10)
-//     {
-//         healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 50, healthBar.getSize().y));
-//     }
-//     else if (damage == 20)
-//     {
-//         healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 100, healthBar.getSize().y));
-//     }
-//     else if (damage == 30)
-//     {
-//         healthBar.setSize(sf::Vector2f(healthBar.getSize().x - 150, healthBar.getSize().y));
-//     }
-//     if (health < 0)
-//     {
-//         health = 0;
-//         isDead = true;
-//     }
-// }
-
-// qasim's reduce health function
 void Player::reduceHealth(int damage)
 {
     if (shieldStatus && currentShieldPower > 0)
     {
-        // Shield absorbs damage first
         if (damage <= currentShieldPower)
         {
-            currentShieldPower -= damage; // Shield absorbs the full damage
-            damage = 0;                   // No damage left for health
+            currentShieldPower -= damage;
+            damage = 0;
         }
         else
         {
-            damage -= currentShieldPower; // If shield can't absorb all, reduce health
-            currentShieldPower = 0;       // Shield is now depleted
-            deactivateShield();           // Shield is turned off after depletion
+            damage -= currentShieldPower;
+            currentShieldPower = 0;
+            deactivateShield();
         }
     }
 
-    // Apply remaining damage to health
     health -= damage;
     if (health < 0)
-        health = 0; // Make sure health doesn't go negative
+        health = 0;
+
+    // Update health bar size
+    healthBar.setSize(sf::Vector2f(500.f * (health / 100.f), healthBar.getSize().y));
 }
 
 void Player::drawHealthBar(sf::RenderWindow &window, bool isGameRunning) const
@@ -180,16 +146,10 @@ bool Player::isPlayerDead()
 
 bool Player::checkCollision(Enemy &enemy)
 {
-    // Define the offset for the player sprite (adjust this based on your offset values)
-    sf::Vector2f offset(playerSprite.getGlobalBounds().width / 2 - 25, playerSprite.getGlobalBounds().height / 2 + 25); // Modify these values as needed
-
-    // Create a copy of the player sprite
+    sf::Vector2f offset(playerSprite.getGlobalBounds().width / 2 - 25, playerSprite.getGlobalBounds().height / 2 + 25);
     sf::Sprite adjustedPlayerSprite = playerSprite;
-
-    // Adjust the player's sprite position by the offset
     adjustedPlayerSprite.setPosition(playerSprite.getPosition() + offset);
 
-    // Perform the collision check with the adjusted player sprite
     return adjustedPlayerSprite.getGlobalBounds().intersects(enemy.getSprite().getGlobalBounds());
 }
 
@@ -200,15 +160,12 @@ int Player::getFireBallCount()
 
 void Player::reset()
 {
-    health = 100; // Reset health
+    health = 100;
     isDead = false;
-
-    healthBar.setSize(sf::Vector2f(500.f, 50.f)); // Reset health bar size
-    playerSprite.setPosition(50.0f, 500.0f);      // Reset player position
+    healthBar.setSize(sf::Vector2f(500.f, 50.f));
+    playerSprite.setPosition(50.0f, 500.0f);
     playerSprite.setTexture(idleTexture);
 }
-
-// Placeholder methods for future functionality
 
 void Player::activateShield()
 {
@@ -225,13 +182,15 @@ bool Player::isShieldActive() const
 {
     return shieldStatus;
 }
+
 void Player::throwFireball()
 {
-    if (this->fireballsCount != 0)
+    if (fireballsCount > 0)
     {
         FireBall ball;
         ball.setFireBallPosition(playerSprite.getPosition().x, playerSprite.getPosition().y);
         updateFireBallThrown();
+        fireballsCount--; // Decrease fireball count when thrown
     }
 }
 
@@ -245,7 +204,7 @@ bool Player::getFireBallStatus()
     return fireBallThrown;
 }
 
-// Display
+// Fireball Class
 FireBall::FireBall() : position(0, 0) {}
 
 FireBall::FireBall(sf::Vector2f position)
@@ -304,6 +263,7 @@ sf::Sprite FireBall::getSprite()
 {
     return sprite;
 }
+
 // enemy class functions
 Enemy::Enemy(int damage, int health, float velocity)
     : damage(damage), health(health), velocity(velocity), isDead(false) {}

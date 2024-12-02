@@ -51,6 +51,7 @@ private:
     // Score and Game State
     int scoreCounter;
     sf::Clock scoreClock;
+    sf::Clock enemySpawnTimer;
     enum class GameState
     {
         Intro,
@@ -70,7 +71,7 @@ private:
     void updateFireBallCount();
     void updateFireBalls();
     void resetGame();
-
+    void spawnRandomEnemy();
 public:
     Game();     // Constructor
     void run(); // Main game loop
