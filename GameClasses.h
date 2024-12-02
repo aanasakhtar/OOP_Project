@@ -5,6 +5,8 @@
 
 // Forward declaration to avoid circular dependencies
 class Enemy;
+class Obstacle;
+class Collectible;
 
 class Player
 {
@@ -39,7 +41,7 @@ public:
     bool loadPlayerAssets();
     void updatePlayer(float platformHeight, float windowHeight, bool isGameRunning);
     void jump();
-    
+
     // Getters
     sf::Sprite getPlayerSprite() const;
     void setPlayerPosition(float playerX, float playerY);
@@ -52,10 +54,11 @@ public:
     void reduceHealth(int damage);
     bool isPlayerDead();
     bool checkCollision(Enemy &enemy);
+    bool checkCollision(Obstacle &obstacle);
     void updateFireBallThrown();
     bool getFireBallStatus();
 
-    void reset(float x , float y);
+    void reset(float x, float y);
     void activateShield();
     void deactivateShield();
     bool isShieldActive() const;
@@ -210,6 +213,7 @@ public:
     virtual void inflictDamage(Player &player);
 
     void setPosition(float x, float y);
+    sf::Sprite getSprite() const;
     sf::FloatRect getGlobalBounds() const;
     void draw(sf::RenderWindow &window);
 };

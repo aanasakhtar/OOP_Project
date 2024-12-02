@@ -38,7 +38,7 @@ private:
     // FireBalls
     std::vector<FireBall> fireballs;
 
-        // Player's fireball count
+    // Player's fireball count
     sf::Texture fireBallTexture;
     sf::Sprite fireBallSprite;
 
@@ -72,6 +72,7 @@ private:
     void updateFireBalls();
     void resetGame();
     void spawnRandomEnemy();
+
 public:
     Game();     // Constructor
     void run(); // Main game loop

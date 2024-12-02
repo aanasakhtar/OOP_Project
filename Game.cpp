@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 Game::Game()
-    : window(sf::VideoMode(1500, 660), "SFML Game"),
+    : window(sf::VideoMode(1800, 960), "SFML Game"),
       backgroundOffset(0.0f),
       backgroundVelocity(0.05f),
       platformOffset(0.0f),
@@ -120,7 +120,7 @@ void Game::spawnRandomEnemy()
         // Bats spawn above the ground, but not too high
         float randomX = window.getSize().x + newEnemy->getGlobalBounds().width;
         // Adjust this value to control how high bats spawn above the platform
-        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height - 100;  // 100 pixels above platform
+        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height - 100; // 100 pixels above platform
         newEnemy->setPosition(randomX, randomY);
     }
     else
@@ -141,14 +141,13 @@ void Game::spawnRandomEnemy()
         // Spiders spawn on the ground (just above the platform)
         float randomX = window.getSize().x + newEnemy->getGlobalBounds().width;
         // Ensure spiders spawn just above the platform (avoid them spawning inside the ground)
-        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height;
+        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height - 30;
         newEnemy->setPosition(randomX, randomY);
     }
 
     // Add the newly created enemy to the enemies vector
     enemies.push_back(std::move(newEnemy));
 }
-
 
 void Game::run()
 {
@@ -213,16 +212,16 @@ void Game::updateGame()
     player.updatePlayer(platformSprite.getGlobalBounds().height, window.getSize().y, true);
 
     // Spawn enemies randomly
-    if (enemySpawnTimer.getElapsedTime().asSeconds() > 2.0f) // Spawn every 2 seconds
+    if (enemySpawnTimer.getElapsedTime().asSeconds() > 1.0f) // Spawn every 2 seconds
     {
         spawnRandomEnemy();
-        enemySpawnTimer.restart();  // Restart the timer after spawning an enemy
+        enemySpawnTimer.restart(); // Restart the timer after spawning an enemy
     }
 
     // Update enemies and check for collisions
     for (auto &enemy : enemies)
     {
-        enemy->updateEnemy(backgroundVelocity, true);
+        enemy->updateEnemy(1.f, true);
 
         if (player.checkCollision(*enemy))
         {
@@ -245,7 +244,6 @@ void Game::updateGame()
                               (window.getSize().y - introText.getLocalBounds().height) / 2);
     }
 }
-
 
 void Game::updateBackground()
 {
