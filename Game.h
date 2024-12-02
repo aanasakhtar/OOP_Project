@@ -44,6 +44,7 @@ private:
 
     // Enemy
     std::vector<std::unique_ptr<Enemy>> enemies;
+    std::vector<std::unique_ptr<Obstacle>> obstacles;
 
     // Collectables
     std::vector<Collectible> collectibles;
@@ -52,6 +53,7 @@ private:
     int scoreCounter;
     sf::Clock scoreClock;
     sf::Clock enemySpawnTimer;
+    sf::Clock obstacleSpawnTimer;
     enum class GameState
     {
         Intro,
@@ -72,6 +74,7 @@ private:
     void updateFireBalls();
     void resetGame();
     void spawnRandomEnemy();
+    void spawnRandomObstacle();
 public:
     Game();     // Constructor
     void run(); // Main game loop

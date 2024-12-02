@@ -155,6 +155,16 @@ bool Player::checkCollision(Enemy &enemy)
     return adjustedPlayerSprite.getGlobalBounds().intersects(enemy.getSprite().getGlobalBounds());
 }
 
+bool Player::checkCollision(Obstacle &obstacle)
+{
+    sf::Vector2f offset(playerSprite.getGlobalBounds().width / 2 - 25, playerSprite.getGlobalBounds().height / 2 + 25);
+    sf::Sprite adjustedPlayerSprite = playerSprite;
+    adjustedPlayerSprite.setPosition(playerSprite.getPosition() + offset);
+
+    return adjustedPlayerSprite.getGlobalBounds().intersects(obstacle.getGlobalBounds());
+}
+
+
 int Player::getFireBallCount()
 {
     return fireballsCount;
@@ -541,6 +551,7 @@ void Shield::interactWithPlayer(Player &player)
 Obstacle::Obstacle(float velocity, int damage)
     : velocity(velocity), damage(damage) {}
 
+// Load texture for the obstacle
 bool Obstacle::loadTexture(const std::string &texturePath)
 {
     if (!texture.loadFromFile(texturePath)) // Load texture into the texture member
@@ -552,60 +563,80 @@ bool Obstacle::loadTexture(const std::string &texturePath)
     return true;
 }
 
+// Update the obstacle (move it left based on background velocity)
 void Obstacle::update(float backgroundVelocity)
 {
     sprite.move(-backgroundVelocity, 0); // Move left with the background velocity
 }
 
+// Default behavior: obstacles inflict damage when the player hits them
 void Obstacle::inflictDamage(Player &player)
 {
-    // Default behavior: obstacles inflict damage when the player hits them
     std::cout << "Obstacle inflicts " << damage << " damage!" << std::endl;
 }
 
+// Set position for the obstacle
 void Obstacle::setPosition(float x, float y)
 {
     sprite.setPosition(x, y);
 }
 
+// Get the global bounds of the obstacle (used for collision detection)
 sf::FloatRect Obstacle::getGlobalBounds() const
 {
     return sprite.getGlobalBounds();
 }
 
+// Draw the obstacle on the screen
 void Obstacle::draw(sf::RenderWindow &window)
 {
     window.draw(sprite); // Draw sprite on screen
 }
 
-Spikes::Spikes(float velocity, int damage)
+Spikes::Spikes(float velocity, int damage,float position)
     : Obstacle(velocity, damage)
-{
-    if (!loadTexture("spikes.png")) // Load spikes texture (path may need adjusting)
+{   
+    sprite.setPosition(position, sprite.getPosition().y);
+    if (!loadTexture("Items\\tile36.png")) 
     {
         std::cerr << "Error: Could not load spikes texture." << std::endl;
     }
 }
 
+
 void Spikes::inflictDamage(Player &player)
 {
-    // Spikes inflict damage instantly
+    if(inflicted == false){
     player.reduceHealth(damage);
     std::cout << "Player hit by spikes! " << damage << " damage taken!" << std::endl;
+    inflicted = true;
+    }
 }
-
-AcidBath::AcidBath(float velocity, int damage)
+AcidBath::AcidBath(float velocity, int damage,float position)
     : Obstacle(velocity, damage)
 {
-    if (!loadTexture("acid_bath.png")) // Load acid bath texture (path may need adjusting)
+    sprite.setPosition(position, sprite.getPosition().y);
+    if (!loadTexture("Details\\lava_drop1_1.png")) // Load acid bath texture (path may need adjusting)
     {
         std::cerr << "Error: Could not load acid bath texture." << std::endl;
     }
 }
 
+
+// Override the update method (if needed, for special behavior)
+void AcidBath::update(float backgroundVelocity)
+{
+    // Custom behavior can be added here (e.g., falling, growing, etc.)
+    Obstacle::update(backgroundVelocity); // Call the base update function for movement
+}
+
+// Acid bath inflicts damage over time (every second)
 void AcidBath::inflictDamage(Player &player)
 {
-    // Acid bath inflicts damage over time
-    player.reduceHealth(damage);
-    std::cout << "Player touched the acid bath! " << damage << " damage taken!" << std::endl;
+    if (timer.getElapsedTime().asSeconds() > 1.0f) // Inflict damage every second
+    {
+        player.reduceHealth(damage);
+        std::cout << "Player touched the acid bath! " << damage << " damage taken!" << std::endl;
+        timer.restart(); // Reset timer after inflicting damage
+    }
 }

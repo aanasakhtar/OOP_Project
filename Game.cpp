@@ -6,9 +6,9 @@
 Game::Game()
     : window(sf::VideoMode(1500, 660), "SFML Game"),
       backgroundOffset(0.0f),
-      backgroundVelocity(0.05f),
+      backgroundVelocity(0.2f),
       platformOffset(0.0f),
-      platformVelocity(1.5f),
+      platformVelocity(0.3f),
       scoreCounter(0)
 {
     gameState = GameState::Intro;
@@ -95,6 +95,33 @@ void Game::loadAssets()
 
     // Player's fireball count
 }
+void Game::spawnRandomObstacle()
+{
+    int randomObstacleType = rand() % 2;
+    std::unique_ptr<Obstacle> newObstacle;
+
+    if (randomObstacleType == 0)
+    {
+        newObstacle = std::make_unique<Spikes>(1.5f, 10, window.getSize().y - platformTileHeight - 30);
+    }
+    else
+    {
+        newObstacle = std::make_unique<AcidBath>(2.0f, 15, window.getSize().y - platformTileHeight - 40);
+    }
+
+    float randomX = window.getSize().x + newObstacle->getGlobalBounds().width;
+
+    float randomY = window.getSize().y - platformTileHeight + 30 - newObstacle->getGlobalBounds().height;
+
+    if (randomObstacleType == 1)
+    {
+        randomY = window.getSize().y - platformTileHeight +130- newObstacle->getGlobalBounds().height;
+    }
+
+    newObstacle->setPosition(randomX, randomY);
+
+    obstacles.push_back(std::move(newObstacle));
+}
 
 void Game::spawnRandomEnemy()
 {
@@ -141,7 +168,7 @@ void Game::spawnRandomEnemy()
         // Spiders spawn on the ground (just above the platform)
         float randomX = window.getSize().x + newEnemy->getGlobalBounds().width;
         // Ensure spiders spawn just above the platform (avoid them spawning inside the ground)
-        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height;
+        float randomY = window.getSize().y - platformTileHeight-30  - newEnemy->getGlobalBounds().height;
         newEnemy->setPosition(randomX, randomY);
     }
 
@@ -212,8 +239,33 @@ void Game::updateGame()
     updateFireBallCount();
     player.updatePlayer(platformSprite.getGlobalBounds().height, window.getSize().y, true);
 
-    // Spawn enemies randomly
-    if (enemySpawnTimer.getElapsedTime().asSeconds() > 2.0f) // Spawn every 2 seconds
+    // Spawn obstacles every 6 seconds
+    if (obstacleSpawnTimer.getElapsedTime().asSeconds() > (rand() % 5 + 2))
+    {
+        spawnRandomObstacle();
+        obstacleSpawnTimer.restart();  // Reset the timer
+    }
+
+    // Update obstacles and check for collisions
+    for (auto &obstacle : obstacles)
+    {
+        obstacle->update(platformVelocity);
+
+        if (player.checkCollision(*obstacle))
+        {
+            obstacle->inflictDamage(player);  // Apply damage to the player on collision
+        }
+    }
+
+    // Remove obstacles that are marked for deletion
+    obstacles.erase(
+        std::remove_if(obstacles.begin(), obstacles.end(),
+                       [](const std::unique_ptr<Obstacle> &obstacle)
+                       { return obstacle->shouldDelete(); }),
+        obstacles.end());
+
+    // Spawn enemies randomly every 2 seconds
+    if (enemySpawnTimer.getElapsedTime().asSeconds() >  (rand() % 5 + 2))
     {
         spawnRandomEnemy();
         enemySpawnTimer.restart();  // Restart the timer after spawning an enemy
@@ -231,21 +283,24 @@ void Game::updateGame()
         }
     }
 
+    // Remove enemies that are marked for deletion
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(),
                        [](const std::unique_ptr<Enemy> &enemy)
                        { return enemy->shouldDelete(); }),
         enemies.end());
 
+    // Check if the player is dead
     if (player.isPlayerDead())
     {
         gameState = GameState::GameOver;
         introText.setString("Game Over!\nScore: " + std::to_string(scoreCounter) + "\nPress Space to Restart");
         introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
                               (window.getSize().y - introText.getLocalBounds().height) / 2);
+        enemies.clear();
+        obstacles.clear();
     }
 }
-
 
 void Game::updateBackground()
 {
@@ -314,7 +369,13 @@ void Game::renderGame()
         platformSprite.setPosition(i * platformTileWidth - platformOffset, window.getSize().y - platformTileHeight);
         window.draw(platformSprite);
     }
-
+    if (gameState == GameState::Running)
+    {
+        for (auto &obstacle : obstacles)
+        {
+            obstacle->draw(window);  // Ensure this function is called
+        }
+    }
     // Draw enemies if the game is running
     if (gameState == GameState::Running)
     {
@@ -322,10 +383,6 @@ void Game::renderGame()
         {
             enemy->renderEnemy(window);
         }
-        // for (auto &collectible : collectibles)
-        // {
-        // collectible->renderCollectible(window);
-        // }
     }
 
     // Draw player and health bar if the game is running
