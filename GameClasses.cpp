@@ -124,8 +124,10 @@ void Player::reduceHealth(int damage)
     }
 
     health -= damage;
-    if (health < 0)
+    if (health <= 0){
+        isDead = true;
         health = 0;
+    }
 
     // Update health bar size
     healthBar.setSize(sf::Vector2f(500.f * (health / 100.f), healthBar.getSize().y));
