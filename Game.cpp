@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 Game::Game()
-    : window(sf::VideoMode(1500, 660), "SFML Game"),
+    : window(sf::VideoMode(1800, 960), "SFML Game"),
       backgroundOffset(0.0f),
       backgroundVelocity(0.2f),
       platformOffset(0.0f),
@@ -58,18 +58,18 @@ void Game::loadAssets()
     introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
                           (window.getSize().y - introText.getLocalBounds().height) / 2);
 
-    fireBallCount.setFont(font);
-    fireBallCount.setCharacterSize(35);
-    fireBallCount.setFillColor(sf::Color(255, 255, 255, 100));
-    fireBallCount.setPosition(window.getSize().x - 250, 105);
-    if (!fireBallTexture.loadFromFile("fireball\\file.png"))
+    fireballText.setFont(font);
+    fireballText.setCharacterSize(35);
+    fireballText.setFillColor(sf::Color(255, 255, 255, 100));
+    fireballText.setPosition(window.getSize().x - 250, 105);
+    if (!fireballTexture.loadFromFile("fireball/file.png"))
     {
         std::cerr << "Error: Could not load fireball texture" << std::endl;
         exit(EXIT_FAILURE);
     }
-    fireBallSprite.setTexture(fireBallTexture);
-    fireBallSprite.setPosition(fireBallCount.getPosition().x + fireBallCount.getGlobalBounds().width + 35, 70);
-    fireBallSprite.setScale(0.125, 0.125);
+    fireballSprite.setTexture(fireballTexture);
+    fireballSprite.setPosition(fireballText.getPosition().x + fireballText.getGlobalBounds().width + 35, 70);
+    fireballSprite.setScale(0.125f, 0.125f);
 
     // Load Platform
     if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
@@ -147,7 +147,7 @@ void Game::spawnRandomEnemy()
         // Bats spawn above the ground, but not too high
         float randomX = window.getSize().x + newEnemy->getGlobalBounds().width;
         // Adjust this value to control how high bats spawn above the platform
-        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height - 100;  // 100 pixels above platform
+        float randomY = window.getSize().y - platformTileHeight - newEnemy->getGlobalBounds().height - 100; // 100 pixels above platform
         newEnemy->setPosition(randomX, randomY);
     }
     else
@@ -175,7 +175,6 @@ void Game::spawnRandomEnemy()
     // Add the newly created enemy to the enemies vector
     enemies.push_back(std::move(newEnemy));
 }
-
 
 void Game::run()
 {
@@ -206,9 +205,9 @@ void Game::handleEvents()
             }
             else if (gameState == GameState::Running)
             {
-                gameState = GameState::Intro;
+                gameState = GameState::Paused;
             }
-            else if (gameState == GameState::Intro)
+            else if (gameState == GameState::Intro || gameState == GameState::Paused)
             {
                 gameState = GameState::Running;
             }
@@ -221,9 +220,8 @@ void Game::handleEvents()
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
         {
-            FireBall fireball(player.getPlayerSprite().getPosition());
-            fireball.setFireBallScale(0.125, 0.125);
-            fireballs.push_back(fireball);
+            std::unique_ptr<FireBall> newFireball = std::make_unique<FireBall>(player.throwFireball());
+            fireballs.push_back(std::move(newFireball));
         }
     }
 }
@@ -232,7 +230,6 @@ void Game::updateGame()
 {
     if (gameState != GameState::Running)
         return;
-
     updateBackground();
     updatePlatform();
     updateScore();
@@ -268,13 +265,13 @@ void Game::updateGame()
     if (enemySpawnTimer.getElapsedTime().asSeconds() >  (rand() % 5 + 2))
     {
         spawnRandomEnemy();
-        enemySpawnTimer.restart();  // Restart the timer after spawning an enemy
+        enemySpawnTimer.restart(); // Restart the timer after spawning an enemy
     }
 
     // Update enemies and check for collisions
     for (auto &enemy : enemies)
     {
-        enemy->updateEnemy(backgroundVelocity, true);
+        enemy->updateEnemy(1.f, true);
 
         if (player.checkCollision(*enemy))
         {
@@ -335,7 +332,7 @@ void Game::updateScore()
 
 void Game::updateFireBallCount()
 {
-    fireBallCount.setString(std::to_string(player.getFireBallCount()) + "x");
+    fireballText.setString(std::to_string(player.getFireBallCount()) + "x");
 }
 
 void Game::resetGame()
@@ -386,16 +383,16 @@ void Game::renderGame()
     }
 
     // Draw player and health bar if the game is running
-    if (gameState == GameState::Running)
+    if (gameState == GameState::Running || gameState == GameState::Paused)
     {
         player.drawHealthBar(window, true);
-        window.draw(fireBallCount);
-        window.draw(fireBallSprite);
+        window.draw(fireballText);
+        window.draw(fireballSprite);
     }
 
     window.draw(player.getPlayerSprite());
     // Draw intro text and score when the game is paused or over
-    if (gameState == GameState::Intro || gameState == GameState::GameOver)
+    if (gameState == GameState::Intro || gameState == GameState::GameOver || gameState == GameState::Paused)
     {
         window.draw(introText);
     }

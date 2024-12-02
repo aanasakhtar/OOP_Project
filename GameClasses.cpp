@@ -6,7 +6,7 @@
 
 Player::Player()
     : health(100), fireballsCount(5), healingPotion(false), velocity(0.0),
-      shieldStatus(false), isJumping(false), isDead(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 50.f)), fireBallThrown(false)
+      shieldStatus(false), isJumping(false), isDead(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 25.f)), fireBallThrown(false)
 {
     healthBar.setFillColor(sf::Color(119, 105, 78));
     healthBar.setPosition(700, 100);
@@ -124,7 +124,8 @@ void Player::reduceHealth(int damage)
     }
 
     health -= damage;
-    if (health <= 0){
+    if (health <= 0)
+    {
         isDead = true;
         health = 0;
     }
@@ -148,6 +149,20 @@ bool Player::isPlayerDead()
 
 bool Player::checkCollision(Enemy &enemy)
 {
+    sf::Vector2f offset(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 + 25);
+    sf::FloatRect offsetRect(offset.x - 25, offset.y - 25, 50, 50);
+    return offsetRect.intersects(enemy.getSprite().getGlobalBounds());
+}
+
+bool Player::checkCollision(Obstacle &Obstacle)
+{
+    sf::Vector2f offset(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 + 25);
+    sf::FloatRect offsetRect(offset.x - 25, offset.y - 25, 50, 50);
+    return offsetRect.intersects(Obstacle.getSprite().getGlobalBounds());
+}
+
+bool Player::checkCollision(Obstacle &obstacle)
+{
     sf::Vector2f offset(playerSprite.getGlobalBounds().width / 2 - 25, playerSprite.getGlobalBounds().height / 2 + 25);
     sf::Sprite adjustedPlayerSprite = playerSprite;
     adjustedPlayerSprite.setPosition(playerSprite.getPosition() + offset);
@@ -170,12 +185,12 @@ int Player::getFireBallCount()
     return fireballsCount;
 }
 
-void Player::reset(float x , float y)
+void Player::reset(float x, float y)
 {
     health = 100;
     isDead = false;
-    healthBar.setSize(sf::Vector2f(500.f, 50.f));
-    playerSprite.setPosition(x , y);
+    healthBar.setSize(sf::Vector2f(500.f, 25.f));
+    playerSprite.setPosition(x, y);
     playerSprite.setTexture(idleTexture);
 }
 
@@ -195,15 +210,18 @@ bool Player::isShieldActive() const
     return shieldStatus;
 }
 
-void Player::throwFireball()
+FireBall Player::throwFireball()
 {
+    FireBall ball;
     if (fireballsCount > 0)
     {
-        FireBall ball;
-        ball.setFireBallPosition(playerSprite.getPosition().x, playerSprite.getPosition().y);
+        ball.loadFireBallTexture();
+        ball.setFireBallPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 + 25);
+        ball.getSprite().setScale(0.125f, 0.125f);
         updateFireBallThrown();
         fireballsCount--; // Decrease fireball count when thrown
     }
+    return ball;
 }
 
 void Player::updateFireBallThrown()
@@ -219,9 +237,11 @@ bool Player::getFireBallStatus()
 // Fireball Class
 FireBall::FireBall() : position(0, 0) {}
 
-FireBall::FireBall(sf::Vector2f position)
+FireBall::FireBall(FireBall &&other) noexcept
 {
-    sprite.setPosition(position);
+    this->texture = std::move(other.texture);
+    this->sprite = std::move(other.sprite);
+    this->position = std::move(other.position);
 }
 
 bool FireBall::loadFireBallTexture()
@@ -466,7 +486,10 @@ void Collectible::update(float backgroundVelocity)
 
 void Collectible::interactWithPlayer(Player &player)
 {
-    if (sprite.getGlobalBounds().intersects(player.getPlayerSprite().getGlobalBounds()))
+    sf::Vector2f offset(player.getPlayerSprite().getPosition().x + player.getPlayerSprite().getGlobalBounds().width / 2, player.getPlayerSprite().getPosition().y + player.getPlayerSprite().getGlobalBounds().height / 2 + 25);
+    sf::FloatRect offsetRect(offset.x - 25, offset.y - 25, 50, 50);
+
+    if (sprite.getGlobalBounds().intersects(offsetRect))
     {
         if (!collected)
         {
