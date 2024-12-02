@@ -38,7 +38,7 @@ private:
     Player player;
 
     // FireBalls
-    std::vector<FireBall> fireballs;
+    std::vector<std::unique_ptr<FireBall>> fireballs;
 
     // Enemy
     std::vector<std::unique_ptr<Enemy>> enemies;

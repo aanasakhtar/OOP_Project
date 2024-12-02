@@ -193,9 +193,8 @@ void Game::handleEvents()
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
         {
-            FireBall fireball(player.getPlayerSprite().getPosition());
-            fireball.setFireBallScale(0.125, 0.125);
-            fireballs.push_back(fireball);
+            std::unique_ptr<FireBall> newFireball = std::make_unique<FireBall>(player.throwFireball());
+            fireballs.push_back(std::move(newFireball));
         }
     }
 }
@@ -241,6 +240,10 @@ void Game::updateGame()
         introText.setString("Game Over!\nScore: " + std::to_string(scoreCounter) + "\nPress Space to Restart");
         introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
                               (window.getSize().y - introText.getLocalBounds().height) / 2);
+    }
+    for (auto &fireball : fireballs)
+    {
+        fireball->updateFireBallOnScreen(1.f, true);
     }
 }
 
@@ -318,6 +321,10 @@ void Game::renderGame()
         for (auto &enemy : enemies)
         {
             enemy->renderEnemy(window);
+        }
+        for (auto &fireball : fireballs)
+        {
+            fireball->renderFireBallForPlayer(window, true);
         }
         // for (auto &collectible : collectibles)
         // {

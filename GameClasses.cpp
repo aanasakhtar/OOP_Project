@@ -191,15 +191,18 @@ bool Player::isShieldActive() const
     return shieldStatus;
 }
 
-void Player::throwFireball()
+FireBall Player::throwFireball()
 {
+    FireBall ball;
     if (fireballsCount > 0)
     {
-        FireBall ball;
+        ball.loadFireBallTexture();
         ball.setFireBallPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 + 25);
+        ball.getSprite().setScale(0.125f, 0.125f);
         updateFireBallThrown();
         fireballsCount--; // Decrease fireball count when thrown
     }
+    return ball;
 }
 
 void Player::updateFireBallThrown()
@@ -215,9 +218,11 @@ bool Player::getFireBallStatus()
 // Fireball Class
 FireBall::FireBall() : position(0, 0) {}
 
-FireBall::FireBall(sf::Vector2f position)
+FireBall::FireBall(FireBall &&other) noexcept
 {
-    sprite.setPosition(position);
+    this->texture = std::move(other.texture);
+    this->sprite = std::move(other.sprite);
+    this->position = std::move(other.position);
 }
 
 bool FireBall::loadFireBallTexture()

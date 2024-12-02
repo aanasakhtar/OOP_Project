@@ -7,6 +7,7 @@
 class Enemy;
 class Obstacle;
 class Collectible;
+class FireBall;
 
 class Player
 {
@@ -55,14 +56,14 @@ public:
     bool isPlayerDead();
     bool checkCollision(Enemy &enemy);
     bool checkCollision(Obstacle &obstacle);
-    void updateFireBallThrown();
-    bool getFireBallStatus();
 
     void reset(float x, float y);
     void activateShield();
     void deactivateShield();
     bool isShieldActive() const;
-    void throwFireball();
+    FireBall throwFireball();
+    void updateFireBallThrown();
+    bool getFireBallStatus();
 };
 
 class FireBall
@@ -74,7 +75,7 @@ private:
 
 public:
     FireBall();
-    FireBall(sf::Vector2f position);
+    FireBall(FireBall &&fireball) noexcept;
     sf::Sprite getSprite();
     bool loadFireBallTexture();
     bool loadFireBallFont();
