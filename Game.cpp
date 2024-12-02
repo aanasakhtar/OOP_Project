@@ -58,18 +58,18 @@ void Game::loadAssets()
     introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
                           (window.getSize().y - introText.getLocalBounds().height) / 2);
 
-    fireBallCount.setFont(font);
-    fireBallCount.setCharacterSize(35);
-    fireBallCount.setFillColor(sf::Color(255, 255, 255, 100));
-    fireBallCount.setPosition(window.getSize().x - 250, 105);
-    if (!fireBallTexture.loadFromFile("fireball\\file.png"))
+    fireballText.setFont(font);
+    fireballText.setCharacterSize(35);
+    fireballText.setFillColor(sf::Color(255, 255, 255, 100));
+    fireballText.setPosition(window.getSize().x - 250, 105);
+    if (!fireballTexture.loadFromFile("fireball/file.png"))
     {
         std::cerr << "Error: Could not load fireball texture" << std::endl;
         exit(EXIT_FAILURE);
     }
-    fireBallSprite.setTexture(fireBallTexture);
-    fireBallSprite.setPosition(fireBallCount.getPosition().x + fireBallCount.getGlobalBounds().width + 35, 70);
-    fireBallSprite.setScale(0.125, 0.125);
+    fireballSprite.setTexture(fireballTexture);
+    fireballSprite.setPosition(fireballText.getPosition().x + fireballText.getGlobalBounds().width + 35, 70);
+    fireballSprite.setScale(0.125f, 0.125f);
 
     // Load Platform
     if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
@@ -178,9 +178,9 @@ void Game::handleEvents()
             }
             else if (gameState == GameState::Running)
             {
-                gameState = GameState::Intro;
+                gameState = GameState::Paused;
             }
-            else if (gameState == GameState::Intro)
+            else if (gameState == GameState::Intro || gameState == GameState::Paused)
             {
                 gameState = GameState::Running;
             }
@@ -204,7 +204,6 @@ void Game::updateGame()
 {
     if (gameState != GameState::Running)
         return;
-
     updateBackground();
     updatePlatform();
     updateScore();
@@ -278,7 +277,7 @@ void Game::updateScore()
 
 void Game::updateFireBallCount()
 {
-    fireBallCount.setString(std::to_string(player.getFireBallCount()) + "x");
+    fireballText.setString(std::to_string(player.getFireBallCount()) + "x");
 }
 
 void Game::resetGame()
@@ -314,7 +313,7 @@ void Game::renderGame()
     }
 
     // Draw enemies if the game is running
-    if (gameState == GameState::Running)
+    if (gameState == GameState::Running || gameState == GameState::Paused)
     {
         for (auto &enemy : enemies)
         {
@@ -327,16 +326,16 @@ void Game::renderGame()
     }
 
     // Draw player and health bar if the game is running
-    if (gameState == GameState::Running)
+    if (gameState == GameState::Running || gameState == GameState::Paused)
     {
         player.drawHealthBar(window, true);
-        window.draw(fireBallCount);
-        window.draw(fireBallSprite);
+        window.draw(fireballText);
+        window.draw(fireballSprite);
     }
 
     window.draw(player.getPlayerSprite());
     // Draw intro text and score when the game is paused or over
-    if (gameState == GameState::Intro || gameState == GameState::GameOver)
+    if (gameState == GameState::Intro || gameState == GameState::GameOver || gameState == GameState::Paused)
     {
         window.draw(introText);
     }

@@ -63,7 +63,6 @@ public:
     void deactivateShield();
     bool isShieldActive() const;
     void throwFireball();
-    bool getFireBall();
 };
 
 class FireBall

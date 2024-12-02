@@ -196,7 +196,7 @@ void Player::throwFireball()
     if (fireballsCount > 0)
     {
         FireBall ball;
-        ball.setFireBallPosition(playerSprite.getPosition().x, playerSprite.getPosition().y);
+        ball.setFireBallPosition(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 + 25);
         updateFireBallThrown();
         fireballsCount--; // Decrease fireball count when thrown
     }

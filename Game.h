@@ -15,7 +15,9 @@ private:
     sf::Font font;
     sf::Text scoreText;
     sf::Text introText;
-    sf::Text fireBallCount;
+    sf::Text fireballText;
+    sf::Texture fireballTexture;
+    sf::Sprite fireballSprite;
 
     // Background
     sf::Texture bgTexture;
@@ -38,10 +40,6 @@ private:
     // FireBalls
     std::vector<FireBall> fireballs;
 
-    // Player's fireball count
-    sf::Texture fireBallTexture;
-    sf::Sprite fireBallSprite;
-
     // Enemy
     std::vector<std::unique_ptr<Enemy>> enemies;
 
@@ -56,6 +54,7 @@ private:
     {
         Intro,
         Running,
+        Paused,
         GameOver
     };
     GameState gameState;
