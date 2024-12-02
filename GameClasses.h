@@ -55,7 +55,7 @@ public:
     void updateFireBallThrown();
     bool getFireBallStatus();
 
-    void reset();
+    void reset(float x , float y);
     void activateShield();
     void deactivateShield();
     bool isShieldActive() const;

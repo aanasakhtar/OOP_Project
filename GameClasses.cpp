@@ -160,12 +160,12 @@ int Player::getFireBallCount()
     return fireballsCount;
 }
 
-void Player::reset()
+void Player::reset(float x , float y)
 {
     health = 100;
     isDead = false;
     healthBar.setSize(sf::Vector2f(500.f, 50.f));
-    playerSprite.setPosition(50.0f, 500.0f);
+    playerSprite.setPosition(x , y);
     playerSprite.setTexture(idleTexture);
 }
 

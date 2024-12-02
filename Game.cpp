@@ -286,7 +286,7 @@ void Game::updateFireBallCount()
 void Game::resetGame()
 {
     // Reset player
-    player.reset(); // Add a `reset()` method in the Player class
+    player.reset(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f); // Add a `reset()` method in the Player class
 
     // Reset score
     scoreCounter = 0;
