@@ -6,6 +6,7 @@
 // Forward declaration to avoid circular dependencies
 class Enemy;
 class Obstacle;
+class FireBall;
 class Player
 {
 private:
@@ -51,10 +52,8 @@ public:
     int getFireBallCount();
     void reduceHealth(int damage);
     bool isPlayerDead();
-    bool checkCollision(Enemy &enemy);   
-    bool checkCollision(Obstacle &obstacle);  
-    void updateFireBallThrown();
-    bool getFireBallStatus();
+    bool checkCollision(Enemy &enemy);
+    bool checkCollision(Obstacle &obstacle);
 
     void reset(float x, float y);
     void activateShield();
@@ -195,42 +194,43 @@ public:
 };
 
 // Obstacles
-class Obstacle : public sf::Sprite {
+class Obstacle : public sf::Sprite
+{
 public:
     Obstacle(float velocity, int damage);
 
     virtual bool loadTexture(const std::string &texturePath);
     virtual void update(float backgroundVelocity);
-    virtual void inflictDamage(Player &player);  
+    virtual void inflictDamage(Player &player);
     virtual void setPosition(float x, float y);
+    sf::Sprite getSprite() const;
     sf::FloatRect getGlobalBounds() const;
     void draw(sf::RenderWindow &window);
     bool shouldDelete() const { return deleteFlag; }
     void markForDeletion() { deleteFlag = true; }
-    
 
 protected:
     sf::Texture texture;
     sf::Sprite sprite;
-    float velocity;  // Speed of the obstacle
-    int damage;      // Damage caused by the obstacle
+    float velocity; // Speed of the obstacle
+    int damage;     // Damage caused by the obstacle
     bool deleteFlag = false;
     bool inflicted = false;
 };
-class Spikes : public Obstacle {
+class Spikes : public Obstacle
+{
 public:
-    Spikes(float velocity, int damage,float position);
+    Spikes(float velocity, int damage, float position);
     void inflictDamage(Player &player) override;
 };
 
-
-class AcidBath : public Obstacle {
+class AcidBath : public Obstacle
+{
 public:
-    AcidBath(float velocity, int damage,float position);
+    AcidBath(float velocity, int damage, float position);
     void update(float backgroundVelocity) override;
     void inflictDamage(Player &player) override;
 
 private:
-    sf::Clock timer; 
+    sf::Clock timer;
 };
-
