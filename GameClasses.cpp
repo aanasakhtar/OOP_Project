@@ -153,6 +153,12 @@ bool Player::checkCollision(Enemy &enemy)
     sf::FloatRect offsetRect(offset.x - 25, offset.y - 25, 50, 50);
     return offsetRect.intersects(enemy.getSprite().getGlobalBounds());
 }
+bool Player::checkCollision(Collectible &collectible)
+{
+    sf::Vector2f offset(playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2, playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2 + 25);
+    sf::FloatRect offsetRect(offset.x - 25, offset.y - 25, 50, 50);
+    return offsetRect.intersects(collectible.getSprite().getGlobalBounds());
+}
 
 bool Player::checkCollision(Obstacle &Obstacle)
 {
@@ -404,17 +410,17 @@ sf::FloatRect Collectible::getGlobalBounds() const
     return sprite.getGlobalBounds();
 }
 
-void Collectible::updateCollectible()
-{
-    sprite.setPosition(sprite.getPosition().x - velocity, sprite.getPosition().y);
-}
-
-void Collectible::renderCollectible(sf::RenderWindow &window)
+void Collectible::render(sf::RenderWindow &window)
 {
     if (!collected)
     {
-        window.draw(sprite); // Draw sprite if not collected
+        window.draw(sprite); // Draw the collectible if not collected
     }
+}
+
+sf::Sprite Collectible::getSprite() const
+{
+    return sprite;
 }
 
 HealingPotion::HealingPotion(int healingAmount, float velocity)
@@ -435,28 +441,6 @@ void HealingPotion::interactWithPlayer(Player &player)
         {
             player.reduceHealth(-healingAmount); // Heal the player
             std::cout << "Player healed by " << healingAmount << std::endl;
-        }
-    }
-}
-
-Shield::Shield(int protectionAmount, float velocity)
-    : Collectible(velocity), protectionAmount(protectionAmount)
-{
-    if (!loadTexture("3.png")) // Load the shield texture (path may need adjusting)
-    {
-        std::cerr << "Error: Could not load shield texture." << std::endl;
-    }
-}
-
-void Shield::interactWithPlayer(Player &player)
-{
-    if (!isCollected())
-    {
-        Collectible::interactWithPlayer(player); // Check for collision with player
-        if (isCollected())
-        {
-            player.activateShield(); // Activate shield for player
-            std::cout << "Shield activated! Protection: " << std::endl;
         }
     }
 }
@@ -550,10 +534,10 @@ void AcidBath::update(float backgroundVelocity)
 // Acid bath inflicts damage over time (every second)
 void AcidBath::inflictDamage(Player &player)
 {
-    if (timer.getElapsedTime().asSeconds() > 1.0f) // Inflict damage every second
+    if (inflicted == false)
     {
         player.reduceHealth(damage);
-        std::cout << "Player touched the acid bath! " << damage << " damage taken!" << std::endl;
-        timer.restart(); // Reset timer after inflicting damage
+        std::cout << "Player hit by spikes! " << damage << " damage taken!" << std::endl;
+        inflicted = true;
     }
 }

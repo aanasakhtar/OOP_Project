@@ -44,13 +44,14 @@ private:
     std::vector<std::unique_ptr<Obstacle>> obstacles;
 
     // Collectables
-    std::vector<Collectible> collectibles;
+    std::vector<std::unique_ptr<Collectible>> collectibles;
 
     // Score and Game State
     int scoreCounter;
     sf::Clock scoreClock;
     sf::Clock enemySpawnTimer;
     sf::Clock obstacleSpawnTimer;
+    sf::Clock collectibleSpawnTimer;
     enum class GameState
     {
         Intro,
@@ -71,6 +72,7 @@ private:
     void resetGame();
     void spawnRandomEnemy();
     void spawnRandomObstacle();
+    void spawnRandomCollectible();
 
 public:
     Game();     // Constructor

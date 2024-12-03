@@ -6,6 +6,7 @@
 // Forward declaration to avoid circular dependencies
 class Enemy;
 class Obstacle;
+class Collectible;
 class Player
 {
 private:
@@ -49,6 +50,7 @@ public:
     bool isPlayerDead();
     bool checkCollision(Enemy &enemy);
     bool checkCollision(Obstacle &obstacle);
+    bool checkCollision(Collectible &Obstacle);
 
     void reset(float x, float y);
     void activateShield();
@@ -124,24 +126,24 @@ class Collectible
 protected:
     sf::Sprite sprite;
     sf::Texture texture;
-    bool collected = false;
+    bool collected;
     float velocity;
 
 public:
     Collectible(float velocity = 0.f);
     virtual ~Collectible() {}
-
+    sf::Sprite getSprite() const;
     virtual bool loadTexture(const std::string &texturePath);
     virtual void update(float backgroundVelocity);
     virtual void interactWithPlayer(Player &player);
 
     bool isCollected() const;
-    virtual void setPosition(float x, float y);
+    void setPosition(float x, float y);
     sf::FloatRect getGlobalBounds() const;
-    virtual void updateCollectible();
-    void renderCollectible(sf::RenderWindow &window);
+    virtual void render(sf::RenderWindow &window);
 };
 
+// HealingPotion class
 class HealingPotion : public Collectible
 {
 private:
@@ -149,17 +151,6 @@ private:
 
 public:
     HealingPotion(int healingAmount = 10, float velocity = 0.f);
-    void interactWithPlayer(Player &player) override;
-};
-
-class Shield : public Collectible
-{
-private:
-    int protectionAmount;
-
-public:
-    Shield() = default;
-    Shield(int protectionAmount, float velocity = 0.f);
     void interactWithPlayer(Player &player) override;
 };
 

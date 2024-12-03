@@ -98,6 +98,21 @@ void Game::loadAssets()
     }
     player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f);
 }
+
+void Game::spawnRandomCollectible()
+{
+
+    std::unique_ptr<Collectible> newCollectible;
+    newCollectible = std::make_unique<HealingPotion>(20, 1.5f);
+    newCollectible->loadTexture("Items\\000_0065_heart.png");
+
+    float randomX = window.getSize().x + newCollectible->getGlobalBounds().width;
+    float randomY = window.getSize().y - platformTileHeight - 30 - newCollectible->getGlobalBounds().height;
+
+    newCollectible->setPosition(randomX, randomY);
+    collectibles.push_back(std::move(newCollectible));
+}
+
 void Game::spawnRandomObstacle()
 {
     int randomObstacleType = rand() % 2;
@@ -275,6 +290,12 @@ void Game::updateGame()
         obstacleSpawnTimer.restart(); // Reset the timer
     }
 
+    if (collectibleSpawnTimer.getElapsedTime().asSeconds() > 15)
+    {
+        spawnRandomCollectible();
+        collectibleSpawnTimer.restart();
+    }
+
     // Update obstacles and check for collisions
     for (auto &obstacle : obstacles)
     {
@@ -293,13 +314,33 @@ void Game::updateGame()
                        { return obstacle->shouldDelete(); }),
         obstacles.end());
 
+    // Remove colletible
+    for (auto &collectible : collectibles)
+    {
+        collectible->update(platformVelocity);
+        if (player.checkCollision(*collectible))
+        {
+            collectible->interactWithPlayer(player);
+        }
+    }
+
+    if (collectibleSpawnTimer.getElapsedTime().asSeconds() > (rand() % 5 + 2))
+    {
+        spawnRandomCollectible();
+        collectibleSpawnTimer.restart(); // Restart the timer after spawning an obstacle
+    }
+
+    collectibles.erase(std::remove_if(collectibles.begin(), collectibles.end(),
+                                      [](const std::unique_ptr<Collectible> &collectible)
+                                      { return collectible->isCollected(); }),
+                       collectibles.end());
+
     // Spawn enemies randomly every 2 seconds
     if (enemySpawnTimer.getElapsedTime().asSeconds() > (rand() % 5 + 2))
     {
         spawnRandomEnemy();
         enemySpawnTimer.restart(); // Restart the timer after spawning an enemy
     }
-
     // Update enemies and check for collisions
     for (auto &enemy : enemies)
     {
@@ -402,6 +443,13 @@ void Game::renderGame()
             obstacle->draw(window); // Ensure this function is called
         }
     }
+
+    // Draw collectibles
+    for (auto &collectible : collectibles)
+    {
+        collectible->render(window); // Fixed here: access correctly
+    }
+
     // Draw enemies if the game is running
     if (gameState == GameState::Running)
     {
