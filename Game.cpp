@@ -324,7 +324,7 @@ void Game::updateGame()
         }
     }
 
-    if (collectibleSpawnTimer.getElapsedTime().asSeconds() > (rand() % 5 + 2))
+    if (collectibleSpawnTimer.getElapsedTime().asSeconds() > (rand() % 2 + 2))
     {
         spawnRandomCollectible();
         collectibleSpawnTimer.restart(); // Restart the timer after spawning an obstacle
