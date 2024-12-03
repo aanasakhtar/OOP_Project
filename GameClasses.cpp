@@ -8,7 +8,7 @@ Player::Player()
     : health(100), healingPotion(false), velocity(0.0),
       shieldStatus(false), isJumping(false), isDead(false), jumpVelocity(0.0f), healthBar(sf::Vector2f(500.f, 25.f))
 {
-    healthBar.setFillColor(sf::Color(119, 105, 78));
+    healthBar.setFillColor(sf::Color::Green);
     healthBar.setPosition(700, 100);
 }
 

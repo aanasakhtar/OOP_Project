@@ -59,15 +59,22 @@ void Game::loadAssets()
 
     scoreText.setFont(font);
     scoreText.setCharacterSize(40);
-    scoreText.setFillColor(sf::Color(119, 105, 78));
+    scoreText.setFillColor(sf::Color::White);
     scoreText.setPosition(100, 100);
 
     introText.setFont(font);
     introText.setCharacterSize(50);
-    introText.setFillColor(sf::Color(255, 255, 255, 100));
+    introText.setFillColor(sf::Color::White);
     introText.setString("Press Space to continue");
     introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
                           (window.getSize().y - introText.getLocalBounds().height) / 2);
+
+    gameOver.setFont(font);
+    gameOver.setCharacterSize(50);
+    gameOver.setFillColor(sf::Color::White);
+    gameOver.setString("Game Over!");
+    gameOver.setPosition((introText.getPosition().x + gameOver.getGlobalBounds().width / 2),
+                         (introText.getPosition().y - 100));
 
     // Load Platform
     if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
@@ -316,9 +323,9 @@ void Game::updateGame()
     if (player.isPlayerDead())
     {
         gameState = GameState::GameOver;
-        introText.setString("Game Over!\nScore: " + std::to_string(scoreCounter) + "\nPress Space to Restart");
-        introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
-                              (window.getSize().y - introText.getLocalBounds().height) / 2);
+        scoreText.setCharacterSize(50);
+        scoreText.setPosition((introText.getPosition().x + (2 * scoreText.getGlobalBounds().width + scoreText.getGlobalBounds().width) / 4),
+                              gameOver.getPosition().y + 50);
         enemies.clear();
         obstacles.clear();
     }
@@ -362,6 +369,8 @@ void Game::resetGame()
 
     // Reset score
     scoreCounter = 0;
+    scoreText.setCharacterSize(40);
+    scoreText.setPosition(100, 100);
 
     // Clear enemies
     enemies.clear();
@@ -417,6 +426,10 @@ void Game::renderGame()
     if (gameState == GameState::GameOver || gameState == GameState::Paused)
     {
         window.draw(introText);
+        if (gameState == GameState::GameOver)
+        {
+            window.draw(gameOver);
+        }
     }
 
     // Draw score

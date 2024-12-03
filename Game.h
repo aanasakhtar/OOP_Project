@@ -15,6 +15,7 @@ private:
     sf::Font font;
     sf::Text scoreText;
     sf::Text introText;
+    sf::Text gameOver;
 
     // Intro Screen
     sf::Texture introScreenTexture;
