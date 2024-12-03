@@ -69,19 +69,6 @@ void Game::loadAssets()
     introText.setPosition((window.getSize().x - introText.getLocalBounds().width) / 2,
                           (window.getSize().y - introText.getLocalBounds().height) / 2);
 
-    fireballText.setFont(font);
-    fireballText.setCharacterSize(35);
-    fireballText.setFillColor(sf::Color(255, 255, 255, 100));
-    fireballText.setPosition(window.getSize().x - 250, 105);
-    if (!fireballTexture.loadFromFile("fireball/file.png"))
-    {
-        std::cerr << "Error: Could not load fireball texture" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    fireballSprite.setTexture(fireballTexture);
-    fireballSprite.setPosition(fireballText.getPosition().x + fireballText.getGlobalBounds().width + 35, 70);
-    fireballSprite.setScale(0.125f, 0.125f);
-
     // Load Platform
     if (!platformTexture.loadFromFile("Tiles_rock\\tile2.png"))
     {
@@ -103,8 +90,6 @@ void Game::loadAssets()
         exit(EXIT_FAILURE);
     }
     player.setPlayerPosition(50.0f, window.getSize().y - platformTileHeight - player.getPlayerDimensions().height + 20.0f);
-
-    // Player's fireball count
 }
 void Game::spawnRandomObstacle()
 {
@@ -264,12 +249,6 @@ void Game::handleEvents()
                 }
             }
         }
-
-        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
-        {
-            std::unique_ptr<FireBall> newFireball = std::make_unique<FireBall>(player.throwFireball());
-            fireballs.push_back(std::move(newFireball));
-        }
     }
 }
 
@@ -280,7 +259,6 @@ void Game::updateGame()
     updateBackground();
     updatePlatform();
     updateScore();
-    updateFireBallCount();
     player.updatePlayer(platformSprite.getGlobalBounds().height, window.getSize().y, true);
 
     // Spawn obstacles every 6 seconds
@@ -377,11 +355,6 @@ void Game::updateScore()
     scoreText.setString("Score: " + std::to_string(scoreCounter));
 }
 
-void Game::updateFireBallCount()
-{
-    fireballText.setString(std::to_string(player.getFireBallCount()) + "x");
-}
-
 void Game::resetGame()
 {
     // Reset player
@@ -433,8 +406,6 @@ void Game::renderGame()
     if (gameState == GameState::Running || gameState == GameState::Paused)
     {
         player.drawHealthBar(window, true);
-        window.draw(fireballText);
-        window.draw(fireballSprite);
     }
 
     window.draw(player.getPlayerSprite());
@@ -450,6 +421,5 @@ void Game::renderGame()
 
     // Draw score
     window.draw(scoreText);
-    // Thrown fireball
     window.display();
 }

@@ -6,12 +6,10 @@
 // Forward declaration to avoid circular dependencies
 class Enemy;
 class Obstacle;
-class FireBall;
 class Player
 {
 private:
     int health;
-    int fireballsCount;
     double velocity;
     bool healingPotion;
     bool shieldStatus;
@@ -32,7 +30,6 @@ private:
     float frameDuration = 0.1f;
 
     sf::RectangleShape healthBar;
-    bool fireBallThrown;
 
 public:
     Player();
@@ -48,8 +45,6 @@ public:
     sf::RectangleShape getHealthBar();
     void drawHealthBar(sf::RenderWindow &window, bool isGameRunning) const;
 
-    // Health & Fireball management
-    int getFireBallCount();
     void reduceHealth(int damage);
     bool isPlayerDead();
     bool checkCollision(Enemy &enemy);
@@ -59,31 +54,6 @@ public:
     void activateShield();
     void deactivateShield();
     bool isShieldActive() const;
-    FireBall throwFireball();
-    void updateFireBallThrown();
-    bool getFireBallStatus();
-};
-
-class FireBall
-{
-private:
-    sf::Texture texture;
-    sf::Sprite sprite;
-    sf::Vector2f position;
-
-public:
-    FireBall();
-    FireBall(FireBall &&fireball) noexcept;
-    sf::Sprite getSprite();
-    bool loadFireBallTexture();
-    bool loadFireBallFont();
-    void setFireBallPosition(float x, float y);
-    void drawFireBall(sf::RenderWindow &window, bool isGameRunning) const;
-    sf::Vector2u getFireBallDimensions() const;
-    void updateCount(unsigned int newCount);
-    void setFireBallScale(float scaleX, float scaleY);
-    void renderFireBallForPlayer(sf::RenderWindow &window, bool thrown);
-    void updateFireBallOnScreen(float velocity, bool thrown);
 };
 
 class Enemy

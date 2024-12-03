@@ -15,9 +15,6 @@ private:
     sf::Font font;
     sf::Text scoreText;
     sf::Text introText;
-    sf::Text fireballText;
-    sf::Texture fireballTexture;
-    sf::Sprite fireballSprite;
 
     // Intro Screen
     sf::Texture introScreenTexture;
@@ -40,9 +37,6 @@ private:
 
     // Player
     Player player;
-
-    // FireBalls
-    std::vector<std::unique_ptr<FireBall>> fireballs;
 
     // Enemy
     std::vector<std::unique_ptr<Enemy>> enemies;
@@ -73,8 +67,6 @@ private:
     void updatePlatform();
     void updateBackground();
     void updateScore();
-    void updateFireBallCount();
-    void updateFireBalls();
     void resetGame();
     void spawnRandomEnemy();
     void spawnRandomObstacle();
