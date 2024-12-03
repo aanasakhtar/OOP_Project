@@ -19,6 +19,10 @@ private:
     sf::Texture fireballTexture;
     sf::Sprite fireballSprite;
 
+    // Intro Screen
+    sf::Texture introScreenTexture;
+    sf::Sprite introScreenSprite;
+    bool start;
     // Background
     sf::Texture bgTexture;
     sf::Sprite bgSprite1, bgSprite2;
@@ -74,6 +78,7 @@ private:
     void resetGame();
     void spawnRandomEnemy();
     void spawnRandomObstacle();
+
 public:
     Game();     // Constructor
     void run(); // Main game loop

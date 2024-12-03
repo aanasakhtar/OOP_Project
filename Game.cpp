@@ -8,8 +8,9 @@ Game::Game()
       backgroundOffset(0.0f),
       backgroundVelocity(0.2f),
       platformOffset(0.0f),
-      platformVelocity(0.3f),
-      scoreCounter(0)
+      platformVelocity(0.5f),
+      scoreCounter(0),
+      start(true)
 {
     gameState = GameState::Intro;
     loadAssets();
@@ -18,6 +19,16 @@ Game::Game()
 void Game::loadAssets()
 {
     std::cout << "Loading assets..." << std::endl;
+
+    // Load game intro screen
+
+    if (!introScreenTexture.loadFromFile("Items\\IntroScreen(i).png"))
+    {
+        std::cerr << "Error: Could not load Background.png" << std::endl;
+        exit(EXIT_FAILURE); // Exit the program if resource fails
+    }
+
+    introScreenSprite.setTexture(introScreenTexture);
 
     // Load Background
     if (!bgTexture.loadFromFile("Background\\Bright\\Background.png"))
@@ -115,7 +126,7 @@ void Game::spawnRandomObstacle()
 
     if (randomObstacleType == 1)
     {
-        randomY = window.getSize().y - platformTileHeight +130- newObstacle->getGlobalBounds().height;
+        randomY = window.getSize().y - platformTileHeight + 130 - newObstacle->getGlobalBounds().height;
     }
 
     newObstacle->setPosition(randomX, randomY);
@@ -168,7 +179,7 @@ void Game::spawnRandomEnemy()
         // Spiders spawn on the ground (just above the platform)
         float randomX = window.getSize().x + newEnemy->getGlobalBounds().width;
         // Ensure spiders spawn just above the platform (avoid them spawning inside the ground)
-        float randomY = window.getSize().y - platformTileHeight-30  - newEnemy->getGlobalBounds().height;
+        float randomY = window.getSize().y - platformTileHeight - 30 - newEnemy->getGlobalBounds().height;
         newEnemy->setPosition(randomX, randomY);
     }
 
@@ -207,15 +218,51 @@ void Game::handleEvents()
             {
                 gameState = GameState::Paused;
             }
-            else if (gameState == GameState::Intro || gameState == GameState::Paused)
+            else if (gameState == GameState::Paused)
             {
                 gameState = GameState::Running;
             }
         }
 
-        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up)
+        if (gameState == GameState::Running && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up)
         {
             player.jump();
+        }
+
+        if (gameState == GameState::Intro)
+        {
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Up)
+            {
+                if (!introScreenTexture.loadFromFile("Items\\IntroScreen(i).png"))
+                {
+                    std::cerr << "Error: Could not load Background.png" << std::endl;
+                    exit(EXIT_FAILURE); // Exit the program if resource fails
+                }
+                introScreenSprite.setTexture(introScreenTexture);
+                start = true;
+            }
+            else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Down)
+            {
+                if (!introScreenTexture.loadFromFile("Items\\IntroScreen(ii).png"))
+                {
+                    std::cerr << "Error: Could not load Background.png" << std::endl;
+                    exit(EXIT_FAILURE); // Exit the program if resource fails
+                }
+                introScreenSprite.setTexture(introScreenTexture);
+                start = false;
+            }
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter)
+            {
+
+                if (start)
+                {
+                    gameState = GameState::Running;
+                }
+                else
+                {
+                    window.close();
+                }
+            }
         }
 
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F)
@@ -240,7 +287,7 @@ void Game::updateGame()
     if (obstacleSpawnTimer.getElapsedTime().asSeconds() > (rand() % 5 + 2))
     {
         spawnRandomObstacle();
-        obstacleSpawnTimer.restart();  // Reset the timer
+        obstacleSpawnTimer.restart(); // Reset the timer
     }
 
     // Update obstacles and check for collisions
@@ -250,7 +297,7 @@ void Game::updateGame()
 
         if (player.checkCollision(*obstacle))
         {
-            obstacle->inflictDamage(player);  // Apply damage to the player on collision
+            obstacle->inflictDamage(player); // Apply damage to the player on collision
         }
     }
 
@@ -262,7 +309,7 @@ void Game::updateGame()
         obstacles.end());
 
     // Spawn enemies randomly every 2 seconds
-    if (enemySpawnTimer.getElapsedTime().asSeconds() >  (rand() % 5 + 2))
+    if (enemySpawnTimer.getElapsedTime().asSeconds() > (rand() % 5 + 2))
     {
         spawnRandomEnemy();
         enemySpawnTimer.restart(); // Restart the timer after spawning an enemy
@@ -370,7 +417,7 @@ void Game::renderGame()
     {
         for (auto &obstacle : obstacles)
         {
-            obstacle->draw(window);  // Ensure this function is called
+            obstacle->draw(window); // Ensure this function is called
         }
     }
     // Draw enemies if the game is running
@@ -392,7 +439,11 @@ void Game::renderGame()
 
     window.draw(player.getPlayerSprite());
     // Draw intro text and score when the game is paused or over
-    if (gameState == GameState::Intro || gameState == GameState::GameOver || gameState == GameState::Paused)
+    if (gameState == GameState::Intro)
+    {
+        window.draw(introScreenSprite);
+    }
+    if (gameState == GameState::GameOver || gameState == GameState::Paused)
     {
         window.draw(introText);
     }
